@@ -267,7 +267,198 @@ picture.hero-portrait-img img {
 }
 
 /* ─────────────────────────────────────────────────────────────────
- * 5. Responsive
+ * 5. TRACE callout (home page — open-source spotlight)
+ * ───────────────────────────────────────────────────────────────── */
+
+.trace-callout {
+  position: relative;
+  margin: 2rem 0 2.5rem;
+  padding: 1.75rem 2rem 1.5rem;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    var(--myst-color-background-secondary) 0%,
+    var(--myst-color-background) 100%
+  );
+  border: 1px solid rgba(140, 90, 58, 0.18);
+  border-left: 4px solid var(--portfolio-hero-accent);
+  box-shadow: 0 2px 12px rgba(50, 30, 15, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.trace-callout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(50, 30, 15, 0.09);
+}
+html.dark .trace-callout {
+  border-color: rgba(217, 166, 122, 0.18);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+html.dark .trace-callout:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.trace-callout-eyebrow > p,
+.trace-callout-eyebrow {
+  font-family: var(--myst-font-family-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--portfolio-hero-accent);
+  margin: 0 0 0.5rem;
+}
+
+.trace-callout-title > p,
+.trace-callout-title {
+  font-family: var(--myst-font-family-heading);
+  font-size: clamp(1.4rem, 2.5vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.75rem;
+  color: var(--myst-color-text);
+  line-height: 1.2;
+}
+
+.trace-callout-body > p,
+.trace-callout-body {
+  font-size: 1.02rem;
+  line-height: 1.6;
+  color: var(--myst-color-text);
+  max-width: 65ch;
+  margin: 0 0 1.25rem;
+}
+
+.trace-callout-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.trace-callout-actions p {
+  margin: 0;
+}
+
+a.trace-callout-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  background: var(--myst-color-primary);
+  color: #fcfaf7 !important;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none !important;
+  border: 1px solid var(--myst-color-primary);
+  transition: background 0.15s ease, border-color 0.15s ease,
+              transform 0.15s ease, box-shadow 0.15s ease;
+}
+a.trace-callout-button:hover {
+  background: var(--myst-color-primary-hover);
+  border-color: var(--myst-color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(140, 90, 58, 0.25);
+}
+html.dark a.trace-callout-button {
+  color: #1a1816 !important;
+}
+
+a.trace-callout-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  color: var(--myst-color-primary) !important;
+  background: transparent;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none !important;
+  border: 1px solid rgba(140, 90, 58, 0.3);
+  transition: border-color 0.15s ease, background 0.15s ease,
+              transform 0.15s ease;
+}
+a.trace-callout-button-secondary:hover {
+  border-color: var(--myst-color-primary);
+  background: rgba(140, 90, 58, 0.06);
+  transform: translateY(-1px);
+}
+html.dark a.trace-callout-button-secondary:hover {
+  background: rgba(217, 166, 122, 0.08);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 6. Diagrams: live Mermaid container + "View fullscreen" chip
+ * ───────────────────────────────────────────────────────────────── */
+
+.mermaid,
+.myst-mermaid,
+div[data-type="mermaid"],
+figure:has(> .mermaid),
+figure:has(> svg[id^="mermaid"]) {
+  background: var(--myst-color-background);
+  border: 1px solid rgba(140, 90, 58, 0.08);
+  border-radius: 8px;
+  padding: 1.25rem 1rem;
+  margin: 1.5rem 0 0.25rem;
+  overflow-x: auto;
+  text-align: center;
+}
+.mermaid svg,
+.myst-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+html.dark .mermaid,
+html.dark .myst-mermaid,
+html.dark div[data-type="mermaid"],
+html.dark figure:has(> .mermaid),
+html.dark figure:has(> svg[id^="mermaid"]) {
+  border-color: rgba(217, 166, 122, 0.12);
+}
+
+/* "View fullscreen" affordance under each diagram. The link is
+   wrapped in p.diagram-fullscreen-row by the raw-HTML embed. */
+.diagram-fullscreen-row,
+p:has(> a.diagram-fullscreen) {
+  text-align: right;
+  margin: 0.25rem 0 1.75rem;
+}
+a.diagram-fullscreen {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--myst-color-text-muted) !important;
+  background: var(--myst-color-background-secondary);
+  border: 1px solid rgba(140, 90, 58, 0.12);
+  border-radius: 999px;
+  text-decoration: none !important;
+  transition: color 0.15s ease, border-color 0.15s ease,
+              background 0.15s ease, transform 0.15s ease;
+}
+a.diagram-fullscreen:hover {
+  color: var(--myst-color-primary) !important;
+  border-color: rgba(140, 90, 58, 0.4);
+  background: var(--myst-color-background);
+  transform: translateY(-1px);
+}
+/* Suppress book-theme's auto-appended external-link / download icon
+   on these pills — the trailing ↗ glyph in the label is the affordance. */
+a.diagram-fullscreen > svg,
+a.trace-callout-button > svg,
+a.trace-callout-button-secondary > svg {
+  display: none !important;
+}
+html.dark a.diagram-fullscreen {
+  border-color: rgba(217, 166, 122, 0.18);
+}
+html.dark a.diagram-fullscreen:hover {
+  border-color: rgba(217, 166, 122, 0.45);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 7. Responsive
  * ───────────────────────────────────────────────────────────────── */
 
 @media (max-width: 720px) {
@@ -290,5 +481,18 @@ picture.hero-portrait-img img {
   }
   .hero-text h1 {
     font-size: 2rem;
+  }
+
+  .trace-callout {
+    padding: 1.25rem 1.25rem 1rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .trace-callout-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  a.trace-callout-button,
+  a.trace-callout-button-secondary {
+    justify-content: center;
   }
 }

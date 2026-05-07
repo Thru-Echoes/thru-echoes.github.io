@@ -33,8 +33,6 @@ and HPC.
 
 ## Selected work
 
-::::{grid} 1 1 2 2
-
 :::{card} Waggle: agentic CRM
 :link: /waggle
 
@@ -44,15 +42,20 @@ email into typed orders, and a semantic-search RAG layer over
 operational data. **Live app and architecture diagrams.**
 :::
 
-:::{card} TRACE: provenance for AI-assisted workflows
-:link: https://github.com/Thru-Echoes/TRACE
-
-A custom MCP server with tools that track decision provenance across
-AI-assisted development: who proposed what, why, and when.
-Open source.
-:::
-
-::::
+<div class="trace-callout">
+  <div class="trace-callout-eyebrow">Open source</div>
+  <div class="trace-callout-title">TRACE: provenance for AI-assisted workflows</div>
+  <div class="trace-callout-body">
+    I built TRACE, an open-source MCP-based Python package for tracking who
+    made what decision and why in AI-assisted workflows. If you've thought
+    hard about agent observability, audit trails, or provenance in
+    AI-assisted dev, I want collaborators. Star, open an issue, or send a PR.
+  </div>
+  <div class="trace-callout-actions">
+    <a href="https://github.com/Thru-Echoes/TRACE" target="_blank" rel="noopener" class="trace-callout-button">★ Star on GitHub →</a>
+    <a href="https://github.com/Thru-Echoes/TRACE/blob/main/docs/specification.md" target="_blank" rel="noopener" class="trace-callout-button-secondary">Read the spec ↗</a>
+  </div>
+</div>
 
 ## Skills
 
