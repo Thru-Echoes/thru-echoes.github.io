@@ -137,6 +137,22 @@ article:has(.hero) > div:has([aria-label="Document Outline"]) {
   display: none !important;
 }
 
+/* Book-theme reserves a wide right gutter for the outline panel even
+   when the panel itself is hidden. On hero pages we override the
+   article grid: simple 3-track layout (1fr · centered content · 1fr)
+   so the hero, selected work, and skills sit in the middle of the
+   viewport instead of pinned to the left with a giant empty right
+   gutter. Desktop only — book-theme's mobile layout is already
+   single-column and works fine. */
+@media (min-width: 1024px) {
+  article:has(.hero) {
+    grid-template-columns: 1fr min(1100px, calc(100% - 4rem)) 1fr !important;
+  }
+  article:has(.hero) > * {
+    grid-column: 2 / 3 !important;
+  }
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) 1fr;
