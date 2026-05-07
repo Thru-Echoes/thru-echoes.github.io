@@ -1,0 +1,278 @@
+/*
+ * Theme overrides for the echoes-portfolio MyST site.
+ *
+ * Organized in layers:
+ *   1. Design tokens   (:root / html.dark)
+ *   2. Typography      (headings, body, mono)
+ *   3. Chrome          (cards, admonitions, tables, footer)
+ *   4. Landing hero    (index page hero section — the distinctive bit)
+ *   5. Responsive      (mobile breakpoints)
+ *
+ * Keep this file under ~300 lines. Anything bigger is a signal to fork
+ * the theme instead.
+ */
+
+/* ─────────────────────────────────────────────────────────────────
+ * 1. Design tokens
+ * ───────────────────────────────────────────────────────────────── */
+
+:root {
+  --myst-color-primary: #8e5a3a;
+  --myst-color-primary-hover: #6d4528;
+  --myst-color-link: #8e5a3a;
+  --myst-color-link-hover: #6d4528;
+
+  --myst-color-background: #fcfaf7;
+  --myst-color-background-secondary: #f6f1ea;
+  --myst-color-text: #1c1917;
+  --myst-color-text-muted: #57534e;
+
+  --myst-font-family-heading:
+    "Source Serif 4", "Spectral", "Charter", Georgia, serif;
+  --myst-font-family-body:
+    "Inter", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --myst-font-family-mono:
+    "Menlo", "JetBrains Mono", "SF Mono", "Fira Code", monospace;
+
+  --portfolio-hero-accent: #8e5a3a;
+  --portfolio-hero-bg: #f6f1ea;
+  --portfolio-hero-shadow: 0 2px 24px rgba(50, 30, 15, 0.08);
+}
+
+html.dark {
+  --myst-color-primary: #d9a67a;
+  --myst-color-primary-hover: #e7bd96;
+  --myst-color-link: #d9a67a;
+  --myst-color-link-hover: #e7bd96;
+
+  --myst-color-background: #1a1816;
+  --myst-color-background-secondary: #242220;
+  --myst-color-text: #f5f4f1;
+  --myst-color-text-muted: #b4afa8;
+
+  --portfolio-hero-accent: #d9a67a;
+  --portfolio-hero-bg: #242220;
+  --portfolio-hero-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 2. Typography
+ * ───────────────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6,
+.myst-heading {
+  font-family: var(--myst-font-family-heading);
+  letter-spacing: -0.015em;
+}
+
+article h2 { margin-top: 2.25rem; }
+article h3 { margin-top: 1.75rem; }
+
+/* ─────────────────────────────────────────────────────────────────
+ * 3. Chrome — cards, admonitions, tables, footer
+ * ───────────────────────────────────────────────────────────────── */
+
+.myst-card,
+.card {
+  border-radius: 8px;
+  border: 1px solid rgba(140, 90, 58, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.myst-card:hover,
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(30, 20, 10, 0.08);
+  border-color: rgba(140, 90, 58, 0.28);
+}
+html.dark .myst-card,
+html.dark .card {
+  border-color: rgba(217, 166, 122, 0.15);
+}
+html.dark .myst-card:hover,
+html.dark .card:hover {
+  border-color: rgba(217, 166, 122, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.admonition {
+  border-left-width: 3px;
+  border-radius: 4px;
+  background: var(--myst-color-background-secondary);
+}
+
+pre code, .highlight pre {
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+
+table {
+  font-size: 0.95em;
+}
+table th {
+  font-family: var(--myst-font-family-heading);
+  font-weight: 600;
+}
+
+footer {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 4. Landing hero
+ * ───────────────────────────────────────────────────────────────── */
+
+/* On hero pages, suppress the chrome the book-theme renders ABOVE the
+   hero. We provide our own title typography inside the hero, so the
+   auto-rendered frontmatter block (title + license badge + byline) is
+   pure duplication. The Outline panel is also hidden — short page, the
+   hero CTAs are the navigation. */
+article:has(.hero) > .myst-fm-block,
+article:has(.hero) > header,
+article:has(.hero) .myst-title-block,
+article:has(.hero) .myst-fm-block-title,
+article:has(.hero) .myst-outline,
+article:has(.hero) > div:has(> .myst-outline),
+article:has(.hero) > div:has([aria-label="Document Outline"]) {
+  display: none !important;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) 1fr;
+  gap: 0;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem 0 3rem;
+  margin: 0 0 1rem;
+  position: relative;
+}
+
+/* Hero portrait. The image source already has soft-edge feathering on
+   all four sides plus an aggressive right-side fade and a halftone-dot
+   buildup baked in (see notes/make_extreme_rightfade.py). So this rule
+   only needs to handle layout — no CSS mask. */
+.hero-portrait-img,
+picture.hero-portrait-img {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+.hero-portrait-img img,
+picture.hero-portrait-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 70vh;
+  max-height: 92vh;
+  object-fit: cover;
+  /* Tuned for static/oliver_green_hero.png. Face is centered
+     horizontally, upper third vertically. Edge fades + right-side
+     fade + halftone are all baked into the source image (see
+     notes/make_extreme_rightfade.py). */
+  object-position: center 30%;
+  margin: 0 !important;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+.hero-text {
+  /* Pull leftward so the text overlays the faded right side of the
+     image — the "text appears out of the image" effect. */
+  margin-left: -15%;
+  padding: 1rem 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Book-theme demotes our markdown # to h2 (because frontmatter title
+   is the semantic h1, which we hide). Style both the same. */
+.hero-text h1,
+.hero-text h2 {
+  font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+  line-height: 1.05;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.025em;
+  font-family: var(--myst-font-family-heading);
+  padding: 0;
+}
+
+/* Hide the heading-anchor link (¶) inside the hero — distracting at
+   display sizes, and the page is short enough that direct heading
+   links aren't valuable here. */
+.hero-text h1 > a,
+.hero-text h2 > a,
+.hero-text h1 .heading-link,
+.hero-text h2 .heading-link {
+  display: none !important;
+}
+
+.hero-text h3 {
+  font-family: var(--myst-font-family-body);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  color: var(--myst-color-text-muted);
+  margin: 0 0 1.5rem;
+  letter-spacing: 0;
+}
+
+.hero-text p {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  max-width: 60ch;
+}
+
+.hero-ctas {
+  margin-top: 1.75rem;
+  font-size: 1rem;
+}
+.hero-ctas a {
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.hero-ctas a:hover {
+  color: var(--myst-color-link-hover);
+  border-bottom-color: var(--myst-color-link-hover);
+}
+
+/* Contact row just under the "What I'm interested in" section. */
+.contact-row {
+  margin-top: 1rem;
+  font-size: 0.98rem;
+  color: var(--myst-color-text-muted);
+}
+.contact-row strong {
+  color: var(--myst-color-text);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 5. Responsive
+ * ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    min-height: auto;
+    padding: 1.5rem 0 2rem;
+    text-align: left;
+  }
+  /* No mobile mask either — the source image has its own fade. */
+  .hero-portrait-img img,
+  picture.hero-portrait-img img {
+    min-height: auto;
+    max-height: 55vh;
+  }
+  .hero-text {
+    margin-left: 0;
+    padding: 0;
+  }
+  .hero-text h1 {
+    font-size: 2rem;
+  }
+}

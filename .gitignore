@@ -1,0 +1,64 @@
+# MyST build artifacts
+_build/
+.myst/
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm/
+
+# macOS
+.DS_Store
+._*
+
+# Python (seed generators, etc. if you drop any alongside)
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Editor cruft
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Env / secrets (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Pandoc / LaTeX build intermediates (kept header.tex but ignore its output)
+*.aux
+*.log
+*.out
+*.toc
+
+# Local CI caches
+.cache/
+
+# Local working artifacts — planning docs, iteration screenshots
+notes/
+screenshots/
+
+# Playwright MCP session artifacts (snapshots, console logs)
+.playwright-mcp/
+
+# Image-variant exploration artifacts (dev only — chosen hero is at
+# static/oliver_green_hero.png, this excludes the iteration set)
+static/variations/
+
+# Sibling project that happens to live inside this directory locally —
+# not part of the portfolio repo. Has its own .git elsewhere.
+# (Leading slash anchors to repo root so projects/waggle/ and
+# static/diagrams/waggle/ aren't accidentally caught.)
+/waggle/
+
+# Claude Code project config (settings + hooks + session state). Local
+# to this machine. .mcp.json contains a hardcoded local TRACE path, so
+# it can't be committed as-is.
+.claude/
+.mcp.json

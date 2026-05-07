@@ -1,0 +1,59 @@
+# MyST project config for the echoes-portfolio site.
+# Docs: https://mystmd.org/guide/frontmatter
+version: 1
+
+project:
+  title: Oliver Muellerklein — Portfolio
+  description: >-
+    Case studies and technical writing from Oliver Muellerklein — agentic
+    systems, MCP servers and tools, data pipelines, and applied ML work.
+  authors:
+    - name: Oliver Muellerklein
+      email: omuellerklein@berkeley.edu
+      github: Thru-Echoes
+      orcid: null
+      affiliation: null
+  github: https://github.com/Thru-Echoes/thru-echoes.github.io
+  license:
+    content: CC-BY-4.0
+    code: MIT
+  keywords:
+    - portfolio
+    - agentic-systems
+    - mcp
+    - jupyter
+    - applied-ml
+  # Explicit ToC — only listed files are rendered as pages. Untracked
+  # markdown in the repo root (planning docs, etc.) is ignored on purpose.
+  toc:
+    - file: index.md
+    - file: projects/waggle/waggle.md
+
+site:
+  template: book-theme
+  title: Oliver Muellerklein
+  options:
+    logo_text: Oliver Muellerklein
+    # Drop in a favicon / logo later. Paths resolve from the site root.
+    # favicon: static/favicon.ico
+    # logo: static/logo.svg
+    style: theme/overrides.css
+    # Hide the automatically generated "Outline" sidebar on top-level
+    # pages; keep it on case-study pages where it actually helps.
+    hide_outline: false
+    hide_toc: false
+    hide_footer_links: false
+  nav:
+    - title: Waggle
+      url: /waggle
+  actions:
+    - title: GitHub
+      url: https://github.com/Thru-Echoes
+      static: false
+    - title: Email
+      url: mailto:omuellerklein@berkeley.edu
+      static: false
+  domains:
+    # Replace with your custom domain once configured in Cloudflare Pages.
+    # - omuellerklein.dev
+    []
