@@ -1,4 +1,4 @@
-# echoes-portfolio — Claude Code instructions
+# echoes-portfolio: Claude Code instructions
 
 Personal portfolio site for **Oliver Muellerklein**, built with [MyST](https://mystmd.org)
 (Jupyter Book 2). Static site, intended to be hosted free on GitHub Pages or
@@ -37,11 +37,14 @@ must follow this rubric. Internal commit messages and code comments are exempt.
   Never passive voice for ownership.
 - Hedge premises (`I think`, `unless I'm mistaken`), not conclusions.
   Conclusions stay direct.
-- One em-dash aside per paragraph max. More is over-imitation.
+- Prefer colons over em dashes. Use `:` for "Title: subtitle" patterns
+  and list intros, parentheses for parenthetical asides, and a plain
+  hyphen `-` only where neither flows. No em dashes (`—`) in site copy
+  or in PR / commit prose.
 - Site copy stays in formal-register (anchor: your email-to-PJ).
-  Lowercase / Slack-casual is from chat only — does not transfer.
+  Lowercase / Slack-casual is from chat only and does not transfer.
 
-**Anti-patterns — never write these:**
+**Anti-patterns, never write these:**
 - AI filler: *"Happy to talk about"*, *"I'd be happy to"*, *"Hope that helps"*,
   *"Feel free to"*, *"Let me know if…"*, *"part of the thesis"*.
 - *"obviously"*, *"clearly"*, *"of course"* preceding non-obvious points.
@@ -52,11 +55,11 @@ must follow this rubric. Internal commit messages and code comments are exempt.
 
 The full verbatim-grounded voice profile is in this user's local memory at
 `memory/user_voice.md` (loaded automatically via `MEMORY.md`). When drafting
-copy, treat it as the rubric — not as inspiration.
+copy, treat it as the rubric, not as inspiration.
 
 ---
 
-## Audience and framing — read carefully
+## Audience and framing: read carefully
 
 This portfolio's **first audience** is a private dev-skills evaluation by a
 specific person who is gauging you as a technical co-founder for an ESG
@@ -78,7 +81,7 @@ layer underneath*, not the headline.
   sustainability / ESG / environmental applications. **Do not name** the
   specific private opportunity, the company, or the people involved.
 
-**ChemMasters is under NDA — never name it on the site.** Waggle is the
+**ChemMasters is under NDA: never name it on the site.** Waggle is the
 public-facing rebuild; describe it as a clean-room implementation, not an
 "anonymized version of client work."
 
@@ -91,9 +94,9 @@ Full role background and reasoning: `memory/user_role.md`.
 
 ## Stack
 
-- **mystmd** — content engine
-- **book-theme** — base, with `theme/overrides.css` (≤300 lines, custom CSS only)
-- **Mermaid** — diagrams, pre-rendered to PNG/SVG; sources kept alongside renders
+- **mystmd**: content engine
+- **book-theme**: base, with `theme/overrides.css` (≤300 lines, custom CSS only)
+- **Mermaid**: diagrams, pre-rendered to PNG/SVG; sources kept alongside renders
 - Static HTML output → `_build/html/`
 - Tests: Python venv at `.venv/`; deps in `tests/requirements.txt`
 
@@ -131,13 +134,13 @@ actionable in this repo.
                                 SUBAGENT_SWEEP.md, README.md
 ```
 
-Local-only working dirs (gitignored — exist on your machine, not in the repo):
-- `notes/` — `PORTFOLIO_PLAN.{md,pdf}`, `PORTFOLIO_PLAN_ARCHITECTURE.{mmd,png}`, `.pdf-header.tex`
-- `screenshots/` — landing/project iteration snapshots
+Local-only working dirs (gitignored, exist on your machine but not in the repo):
+- `notes/`: `PORTFOLIO_PLAN.{md,pdf}`, `PORTFOLIO_PLAN_ARCHITECTURE.{mmd,png}`, `.pdf-header.tex`
+- `screenshots/`: landing/project iteration snapshots
 
 ## Routing quirk
 
-MyST's default routing **flattens** the file tree — every page lands at `/<basename>`,
+MyST's default routing **flattens** the file tree: every page lands at `/<basename>`,
 not at the nested path. Two consequences worth knowing:
 
 - `projects/waggle/waggle.md` lives at `/waggle`, not `/projects/waggle/`.
@@ -159,12 +162,12 @@ Use absolute paths in internal links: `[Meridian](/meridian)`, not relative.
 
 ## Test conventions
 
-- **`check_links.py`** — deterministic; HTTP, anchor existence, mailto format,
+- **`check_links.py`**: deterministic; HTTP, anchor existence, mailto format,
   image src, external URLs (rate-sensitive hosts skipped via `EXTERNAL_SKIP`).
-- **`check_ui.py`** — Playwright + headless Chromium; theme toggle, popovers,
+- **`check_ui.py`**: Playwright + headless Chromium; theme toggle, popovers,
   TOC expand, mobile nav, copy-code, Escape-closes. Skips cleanly when an
   element is absent on a given page.
-- **`SUBAGENT_SWEEP.md`** — frozen one-shot QA from 16 parallel subagents
+- **`SUBAGENT_SWEEP.md`**: frozen one-shot QA from 16 parallel subagents
   (2026-04-23). Reference, not re-runnable from a script.
 
 Run **both** layers when touching site copy or structure. Both expect a
@@ -174,11 +177,11 @@ running preview server.
 
 ## Deliberately not in this file
 
-- Detailed voice patterns, verbatim quotes, full role/career background — those
+- Detailed voice patterns, verbatim quotes, full role/career background: those
   live in `memory/` and load automatically.
-- Long-form planning, alternatives considered, decision rationale —
+- Long-form planning, alternatives considered, decision rationale:
   `notes/PORTFOLIO_PLAN.md` (local only, gitignored).
-- Deploy, CI, domain, GitHub repo creation — all open. Don't auto-wire any of
+- Deploy, CI, domain, GitHub repo creation: all open. Don't auto-wire any of
   these without explicit go-ahead.
 
 <!-- trace-mcp:claude-code -->
@@ -202,7 +205,7 @@ data. A sparse honest record beats a dense fabricated one.
 
 - **Decisions** (propose BEFORE acting, resolve when the human responds).
 - **Corrections** when the human catches an AI mistake.
-- **Contributions** — one per artifact, with `direction` (who had the idea)
+- **Contributions**: one per artifact, with `direction` (who had the idea)
   and `execution` (who did the work).
 - Domain tool calls (not file reads, greps, or TRACE's own calls).
 

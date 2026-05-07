@@ -3,8 +3,8 @@
 Source of the personal portfolio site for Oliver Muellerklein.
 Deployed at <https://thru-echoes.github.io/>.
 
-Built with [MyST (mystmd)](https://mystmd.org/) — a Jupyter-ecosystem
-content engine — and hosted as a static site on GitHub Pages.
+Built with [MyST (mystmd)](https://mystmd.org/), a Jupyter-ecosystem
+content engine, and hosted as a static site on GitHub Pages.
 
 ## Quickstart
 
@@ -37,11 +37,11 @@ instant.
 
 Only files listed in `myst.yml`'s `project.toc` are rendered as pages.
 Planning docs live in `notes/` and iteration screenshots in
-`screenshots/`; both are gitignored — they exist locally only.
+`screenshots/`; both are gitignored - they exist locally only.
 
 ## Adding a project
 
-1. Create `projects/<slug>/<slug>.md` (note: not `index.md` — see the
+1. Create `projects/<slug>/<slug>.md` (note: not `index.md`; see the
    routing-quirk note in `CLAUDE.md`).
 2. Add it to `myst.yml`'s `project.toc` under the Projects node.
 3. Append the new path to `tests/check_links.py`'s `PAGES` list.
@@ -55,7 +55,7 @@ and uploads the result to GitHub Pages.
 To enable on a fresh repo:
 
 1. Push the repo to GitHub at `Thru-Echoes/thru-echoes.github.io`
-   (the repo name itself is what makes this a user-pages site —
+   (the repo name itself is what makes this a user-pages site;
    it must match `<username>.github.io`).
 2. In the repo settings → Pages → Source, select **GitHub Actions**.
 3. Push to `main` (or run the workflow manually from the Actions tab).
@@ -67,10 +67,10 @@ and configure DNS at your registrar.
 
 ## Stack
 
-- **[mystmd](https://mystmd.org/)** — content engine
-- **[book-theme](https://github.com/jupyter-book/myst-theme)** — base theme
-- **GitHub Pages** — hosting
-- **Mermaid** — pre-rendered to PNG/SVG for the case study
+- **[mystmd](https://mystmd.org/)**: content engine
+- **[book-theme](https://github.com/jupyter-book/myst-theme)**: base theme
+- **GitHub Pages**: hosting
+- **Mermaid**: pre-rendered to PNG/SVG for the case study
 
 ## License
 

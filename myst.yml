@@ -3,9 +3,9 @@
 version: 1
 
 project:
-  title: Oliver Muellerklein — Portfolio
+  title: Oliver Muellerklein - Portfolio
   description: >-
-    Case studies and technical writing from Oliver Muellerklein — agentic
+    Case studies and technical writing from Oliver Muellerklein: agentic
     systems, MCP servers and tools, data pipelines, and applied ML work.
   authors:
     - name: Oliver Muellerklein
@@ -23,7 +23,7 @@ project:
     - mcp
     - jupyter
     - applied-ml
-  # Explicit ToC — only listed files are rendered as pages. Untracked
+  # Explicit ToC: only listed files are rendered as pages. Untracked
   # markdown in the repo root (planning docs, etc.) is ignored on purpose.
   toc:
     - file: index.md
