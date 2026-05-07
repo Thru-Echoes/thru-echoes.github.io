@@ -18,7 +18,7 @@ description: >-
 
 # Oliver Muellerklein
 
-I build agentic systems end-to-end — LLM-driven extraction pipelines,
+I build agentic systems end-to-end: LLM-driven extraction pipelines,
 semantic search, custom MCP tooling, and the full-stack applications
 that wrap them. Background in environmental science, geospatial data,
 and HPC.
@@ -35,7 +35,7 @@ and HPC.
 
 ::::{grid} 1 1 2 2
 
-:::{card} Waggle — agentic CRM
+:::{card} Waggle: agentic CRM
 :link: /waggle
 
 A full-stack agentic CRM I built for a beekeeping wholesale domain.
@@ -44,11 +44,11 @@ email into typed orders, and a semantic-search RAG layer over
 operational data. **Live app and architecture diagrams.**
 :::
 
-:::{card} TRACE — provenance for AI-assisted workflows
+:::{card} TRACE: provenance for AI-assisted workflows
 :link: https://github.com/Thru-Echoes/TRACE
 
-A custom MCP server with tools that track decision provenance — who
-proposed what, why, and when — across AI-assisted development.
+A custom MCP server with tools that track decision provenance across
+AI-assisted development: who proposed what, why, and when.
 Open source.
 :::
 
@@ -67,7 +67,7 @@ Open source.
 :::
 
 :::{card} Backend / data engineering
-- Python — FastAPI, Pydantic, async pipelines
+- Python: FastAPI, Pydantic, async pipelines
 - JavaScript / TypeScript, Clojure / ClojureScript
 - Postgres + pgvector, SQL, Alembic migrations
 - FSM design, idempotent ETL, schema-first ingest
@@ -76,23 +76,23 @@ Open source.
 
 :::{card} Cloud, HPC + containers
 - AWS (EC2, SageMaker), Azure, GCP
-- HPC — Slurm, batch jobs, distributed compute
-- Containers — Docker, Kubernetes
+- HPC: Slurm, batch jobs, distributed compute
+- Containers: Docker, Kubernetes
 - Apptainer (renamed from Singularity, 2021)
 - Reproducible env management across cloud + on-prem
 :::
 
 :::{card} Geospatial / mapping
 - PostGIS for spatial SQL
-- Google Earth Engine — low-level API + scripts
+- Google Earth Engine: low-level API + scripts
 - GDAL / OGR, raster + vector workflows
 - Interactive web maps + geospatial models in Python, JavaScript, Clojure / ClojureScript
 - Satellite imagery (Sentinel, Landsat), time-series rasters, CRS handling
 :::
 
 :::{card} Data science / R / applied ML
-- R + RStudio — extensively, ecological + environmental modelling
-- Python — pandas, scikit-learn
+- R + RStudio: extensively, ecological + environmental modelling
+- Python: pandas, scikit-learn
 - Time-series and spatial statistics
 - Reproducible analysis pipelines
 :::
