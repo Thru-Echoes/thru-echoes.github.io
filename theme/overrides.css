@@ -391,30 +391,33 @@ html.dark a.trace-callout-button-secondary:hover {
  * 6. Diagrams: live Mermaid container + "View fullscreen" chip
  * ───────────────────────────────────────────────────────────────── */
 
-.mermaid,
-.myst-mermaid,
-div[data-type="mermaid"],
-figure:has(> .mermaid),
-figure:has(> svg[id^="mermaid"]) {
-  background: var(--myst-color-background);
-  border: 1px solid rgba(140, 90, 58, 0.08);
+/* MyST renders mermaid as <figure><div><svg id="mermaid-..."> with no
+   class on the wrappers. We target the figure that contains a mermaid
+   svg anywhere inside (not just as direct child). */
+figure:has(svg[id^="mermaid"]) {
+  /* Stable cream "paper" fill so Mermaid's default dark text and stroke
+     lines stay readable in both light and dark modes. The SVG itself is
+     transparent, so without a fixed light background under it the dark
+     glyphs vanish on a dark page. */
+  background: #fcfaf7;
+  border: 1px solid rgba(140, 90, 58, 0.12);
   border-radius: 8px;
   padding: 1.25rem 1rem;
   margin: 1.5rem 0 0.25rem;
   overflow-x: auto;
   text-align: center;
 }
-.mermaid svg,
-.myst-mermaid svg {
+figure:has(svg[id^="mermaid"]) svg {
   max-width: 100%;
   height: auto;
 }
-html.dark .mermaid,
-html.dark .myst-mermaid,
-html.dark div[data-type="mermaid"],
-html.dark figure:has(> .mermaid),
-html.dark figure:has(> svg[id^="mermaid"]) {
-  border-color: rgba(217, 166, 122, 0.12);
+html.dark figure:has(svg[id^="mermaid"]) {
+  /* Warm cream "paper inset" against the dark page: keeps Mermaid's
+     dark glyphs visible and reads intentionally as a figure block,
+     not a blinding white card. */
+  background: #f0e8da;
+  border-color: rgba(217, 166, 122, 0.25);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
 /* "View fullscreen" affordance under each diagram. The link is
@@ -458,7 +461,53 @@ html.dark a.diagram-fullscreen:hover {
 }
 
 /* ─────────────────────────────────────────────────────────────────
- * 7. Responsive
+ * 7. Top nav: hamburger drawer at all widths
+ *
+ * The book-theme switches the top nav to inline text items at
+ * lg (1024px+) and the hamburger disappears at xl (1280px+). At those
+ * widths the .myst-primary-sidebar transitions from a hidden drawer
+ * into a fixed full-width article-grid overlay marked
+ * xl:pointer-events-none — but pointer-events:none does not cascade,
+ * so the inner .myst-primary-sidebar-nav still intercepts clicks on
+ * page content underneath. Visible symptom: nav text appearing to
+ * "overlay" content, plus buttons (e.g. "Star on GitHub") refusing
+ * to navigate because their click is captured by the invisible sheet.
+ *
+ * Fix: force the small-width hamburger-drawer pattern at every width.
+ * ───────────────────────────────────────────────────────────────── */
+
+/* Always show the hamburger menu button (override Tailwind xl:hidden
+   on the wrapper that contains .myst-top-nav-menu-button). */
+.myst-top-nav-bar > div:first-child > div:has(> button.myst-top-nav-menu-button) {
+  display: block !important;
+}
+
+/* Always hide the inline text-nav items so the hamburger drawer
+   becomes the only nav surface. */
+.myst-top-nav-bar > div:nth-child(2) > div:first-child:has(.myst-top-nav-item),
+.myst-top-nav-item {
+  display: none !important;
+}
+
+/* At xl+ the sidebar would render as a transparent article-grid
+   overlay across the full viewport, blocking clicks on content
+   underneath. Pin it back to drawer dimensions and let the .hidden
+   class (default closed state) actually take effect. */
+@media (min-width: 1280px) {
+  .myst-primary-sidebar {
+    width: 75vw !important;
+    max-width: 350px !important;
+    top: 0 !important;
+    height: 100vh !important;
+    pointer-events: auto !important;
+  }
+  .myst-primary-sidebar.hidden {
+    display: none !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+ * 8. Responsive
  * ───────────────────────────────────────────────────────────────── */
 
 @media (max-width: 720px) {
