@@ -8,7 +8,7 @@ description: >-
 ::::{div}
 :class: hero
 
-:::{image} static/oliver_green_hero.png
+:::{image} static/oliver_wave-glitch-v2.png
 :alt: Oliver Muellerklein
 :class: hero-portrait-img
 :::
