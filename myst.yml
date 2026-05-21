@@ -23,6 +23,10 @@ project:
     - mcp
     - jupyter
     - applied-ml
+  # Local plugins. Lightbox is a vendored fork of choldgraf/myst-lightbox
+  # extended to cover {mermaid} blocks; see theme/lightbox.mjs.
+  plugins:
+    - theme/lightbox.mjs
   # Explicit ToC: only listed files are rendered as pages. Untracked
   # markdown in the repo root (planning docs, etc.) is ignored on purpose.
   toc:
