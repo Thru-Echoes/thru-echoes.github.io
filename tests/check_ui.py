@@ -43,6 +43,7 @@ MOBILE: ViewportSize = {"width": 390, "height": 844}
 LANDING = "/"
 CASE_STUDY = "/meridian"
 WITH_CODE_BLOCK = "/fsm"   # has a fenced code block → copy button
+WITH_MERMAID = "/waggle"   # has six {mermaid} blocks → lightbox target
 
 
 def html_classes(page: Page) -> str:
@@ -315,6 +316,97 @@ class TestKeyboard:
         # After Escape, no role="menu" should be visible (or aria-expanded=false).
         expanded = btn.first.get_attribute("aria-expanded")
         assert expanded in (None, "false") or page.get_by_role("menu").count() == 0
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Lightbox (theme/lightbox.mjs): images + mermaid
+# ─────────────────────────────────────────────────────────────────────
+
+class TestLightbox:
+    """Vendored fork of choldgraf/myst-lightbox, extended for mermaid."""
+
+    def test_mermaid_svgs_have_zoom_cursor(self, page: Page, base_url: str):
+        page.goto(base_url + WITH_MERMAID)
+        set_desktop(page)
+        page.wait_for_function(
+            "() => document.querySelectorAll('svg[id^=\"mermaid-\"]').length >= 1",
+            timeout=10000,
+        )
+        cursor = page.evaluate(
+            "() => getComputedStyle(document.querySelector('svg[id^=\"mermaid-\"]')).cursor"
+        )
+        assert cursor == "zoom-in", f"Expected zoom-in cursor, got {cursor!r}"
+
+    def test_clicking_mermaid_opens_glightbox_with_cloned_svg(
+        self, page: Page, base_url: str
+    ):
+        page.goto(base_url + WITH_MERMAID)
+        set_desktop(page)
+        page.wait_for_function(
+            "() => document.querySelectorAll('svg[id^=\"mermaid-\"]').length >= 1",
+            timeout=10000,
+        )
+        page.evaluate(
+            """() => {
+              const svg = document.querySelector('svg[id^="mermaid-"]');
+              svg.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }"""
+        )
+        overlay = page.locator(".glightbox-container")
+        expect(overlay).to_be_visible(timeout=3000)
+        cloned = page.locator('.glightbox-container svg[id^="mermaid-"]')
+        expect(cloned).to_have_count(1)
+
+    def test_escape_closes_mermaid_lightbox(self, page: Page, base_url: str):
+        page.goto(base_url + WITH_MERMAID)
+        set_desktop(page)
+        page.wait_for_function(
+            "() => document.querySelectorAll('svg[id^=\"mermaid-\"]').length >= 1",
+            timeout=10000,
+        )
+        page.evaluate(
+            """() => {
+              const svg = document.querySelector('svg[id^="mermaid-"]');
+              svg.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }"""
+        )
+        expect(page.locator(".glightbox-container")).to_be_visible(timeout=3000)
+        page.keyboard.press("Escape")
+        expect(page.locator(".glightbox-container")).to_have_count(0, timeout=3000)
+
+    def test_landing_image_wrapped_for_lightbox(self, page: Page, base_url: str):
+        page.goto(base_url + LANDING)
+        set_desktop(page)
+        page.wait_for_function(
+            "() => document.querySelectorAll('a.myst-lightbox-link img').length >= 1",
+            timeout=10000,
+        )
+        link = page.locator("a.myst-lightbox-link").first
+        expect(link).to_be_attached()
+        href = link.get_attribute("href")
+        assert href and (href.endswith(".png") or ".webp" in href), (
+            f"Expected image href, got {href!r}"
+        )
+
+    def test_double_click_does_not_stack_overlays(self, page: Page, base_url: str):
+        page.goto(base_url + WITH_MERMAID)
+        set_desktop(page)
+        page.wait_for_function(
+            "() => document.querySelectorAll('svg[id^=\"mermaid-\"]').length >= 1",
+            timeout=10000,
+        )
+        # Two clicks in rapid succession on the same diagram should still
+        # result in exactly one open lightbox overlay.
+        page.evaluate(
+            """() => {
+              const svg = document.querySelector('svg[id^="mermaid-"]');
+              svg.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+              svg.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            }"""
+        )
+        expect(page.locator(".glightbox-container")).to_have_count(1, timeout=3000)
+        page.keyboard.press("Escape")
+        expect(page.locator(".glightbox-container")).to_have_count(0, timeout=3000)
 
 
 # ─────────────────────────────────────────────────────────────────────
