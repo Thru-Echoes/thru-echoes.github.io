@@ -43,7 +43,7 @@ MOBILE: ViewportSize = {"width": 390, "height": 844}
 LANDING = "/"
 CASE_STUDY = "/meridian"
 WITH_CODE_BLOCK = "/fsm"   # has a fenced code block → copy button
-WITH_MERMAID = "/waggle"   # has six {mermaid} blocks → lightbox target
+WITH_MERMAID = "/waggle"   # has seven {mermaid} blocks → lightbox target
 
 
 def html_classes(page: Page) -> str:
@@ -427,3 +427,66 @@ class TestDarkModeRender:
         expect(img).to_be_visible()
         w = img.evaluate("el => el.clientWidth")
         assert w > 200, f"Expected portrait ≥200px wide, got {w}"
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Waggle case-study diagrams (synced from agentic-mcp-crm/diagrams/source)
+# ─────────────────────────────────────────────────────────────────────
+
+# The seven inline diagrams on /waggle, identified by their source-set
+# number, in the order they appear on the page. MyST content-hashes each
+# fullscreen-link target (e.g. /static/diagrams/waggle/waggle-01-system-
+# architecture.png → waggle-01-system-arc-<hash>.png on the asset server),
+# so we assert on the stable "waggle-0N" stem rather than the exact path.
+WAGGLE_DIAGRAM_ORDER: list[str] = ["01", "06", "03", "04", "02", "05", "07"]
+
+
+class TestWaggleDiagrams:
+    """The /waggle case study renders seven inline mermaid diagrams, each
+    with a 'View fullscreen' PNG link.
+
+    A mermaid syntax error silently drops a diagram (its SVG never mounts),
+    so asserting the *exact* count catches a broken source before it ships.
+    The fullscreen PNGs are the only raster fallback, so each link must map
+    to the right diagram and resolve to a real image.
+    """
+
+    def _fullscreen_hrefs(self, page: Page, base_url: str) -> list[str]:
+        page.goto(base_url + WITH_MERMAID)
+        set_desktop(page)
+        links = page.locator("a.diagram-fullscreen")
+        expect(links).to_have_count(7)
+        return [links.nth(i).get_attribute("href") or "" for i in range(7)]
+
+    def test_exactly_seven_mermaid_diagrams_render(self, page: Page, base_url: str):
+        page.goto(base_url + WITH_MERMAID)
+        set_desktop(page)
+        # mermaid mounts client-side after page load. expect() polls until it
+        # observes exactly seven SVGs, which is robust to the brief
+        # hydration/re-render races a one-shot count snapshot would trip on.
+        # A persistent miss here means a diagram's source failed to parse.
+        expect(page.locator('svg[id^="mermaid-"]')).to_have_count(7, timeout=20000)
+
+    def test_fullscreen_links_map_to_diagrams_in_order(
+        self, page: Page, base_url: str
+    ):
+        hrefs = self._fullscreen_hrefs(page, base_url)
+        nums: list[str] = []
+        for h in hrefs:
+            m = re.search(r"waggle-(0\d)", h)
+            assert m, f"fullscreen href is not a waggle diagram asset: {h!r}"
+            nums.append(m.group(1))
+        assert nums == WAGGLE_DIAGRAM_ORDER, (
+            "Fullscreen links drifted from the expected diagram set.\n"
+            f"  expected order: {WAGGLE_DIAGRAM_ORDER}\n"
+            f"  got:            {nums}"
+        )
+
+    def test_each_fullscreen_png_resolves(self, page: Page, base_url: str):
+        for h in self._fullscreen_hrefs(page, base_url):
+            resp = page.request.get(h)
+            assert resp.ok, f"{h} → HTTP {resp.status}"
+            ctype = resp.headers.get("content-type", "")
+            assert "image/png" in ctype, (
+                f"{h} served as {ctype!r}, expected image/png"
+            )
