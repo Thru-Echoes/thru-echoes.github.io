@@ -205,6 +205,10 @@ class ChainNode(_Out):
     execution: Party | None = Field(default=None, description="Contributions only: who did the work.")
     headline: str = Field(description="Approved short text shown on the graph node.")
     text: str | None = Field(default=None, description="Approved longer quote, one labelled part per line.")
+    resolution: str | None = Field(
+        default=None,
+        description="Approved text of a human's rejection or revision; drawn as its own ruling box. Decisions only.",
+    )
     url: str | None = Field(default=None, description="External references only: an https link.")
 
 
@@ -227,6 +231,7 @@ class Excerpt(_Out):
     nodes: list[ChainNode] = Field(min_length=1)
     edges: list[ChainEdge] = Field(description="Derived from the records' own link fields, never hand-entered.")
     unshown_links: int = Field(ge=0, description="Links stored in shown records whose target is not shown.")
+    featured: bool = Field(default=False, description="Shown on the landing page; at most one chain.")
     approved_on: date
     approved_by: str = Field(description="Who approved publication (the owner, or the owner's delegated panel).")
 

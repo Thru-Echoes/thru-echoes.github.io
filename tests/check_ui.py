@@ -341,7 +341,7 @@ class TestDarkModeRender:
 # TRACE evidence page: table, themed chart pairs, phone width
 # ─────────────────────────────────────────────────────────────────────
 
-EVIDENCE = "/trace-evidence"
+EVIDENCE = "/trace-usage"  # aggregate usage page (tables and charts)
 _VISIBLE_CHARTS = """
 () => Array.from(document.querySelectorAll('.evidence-chart img'))
   .filter(i => getComputedStyle(i).display !== 'none')
@@ -387,14 +387,15 @@ class TestEvidencePage:
     def test_home_links_to_evidence(self, page: Page, base_url: str):
         page.goto(base_url + LANDING)
         set_desktop(page)
-        assert page.locator('a[href="/trace-evidence"]').count() >= 2
+        assert page.locator('a[href="/trace-evidence"]').count() >= 2, "hero link and callout button"
+        assert page.locator('a[href="/trace-usage"]').count() >= 1
 
 
 # ─────────────────────────────────────────────────────────────────────
 # TRACE decision chains page: the interactive chain graph (shadow DOM)
 # ─────────────────────────────────────────────────────────────────────
 
-DECISIONS = "/trace-decisions"
+DECISIONS = "/trace-evidence"  # decision chains
 
 
 def _widget(page: Page):
@@ -496,8 +497,32 @@ class TestDecisionsPage:
         sw, iw = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
         assert sw <= iw, f"page scrolls horizontally: scrollWidth={sw} innerWidth={iw}"
 
-    def test_overview_links_to_decisions(self, page: Page, base_url: str):
+    def test_usage_page_links_to_evidence(self, page: Page, base_url: str):
         page.goto(base_url + EVIDENCE)
         set_desktop(page)
-        assert page.locator('a[href="/trace-decisions"]').count() >= 1
+        assert page.locator('a[href="/trace-evidence"]').count() >= 1
+
+    def test_human_ruling_drawn_as_its_own_box(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        cards = w.locator(".tcg-card")
+        for i in range(cards.count()):
+            cards.nth(i).click()
+            if w.locator(".tcg-node.k-ruling").count():
+                break
+        ruling = w.locator(".tcg-node.k-ruling").first
+        expect(ruling.locator(".tcg-kind")).to_contain_text("Human")
+        assert w.locator(".tcg-edge.r-rules").count() >= 1
+        assert w.locator(".tcg-elabel.r-rules").first.inner_text() in ("rejects", "amends")
+
+    def test_landing_shows_featured_chain_compact(self, page: Page, base_url: str):
+        page.goto(base_url + LANDING)
+        set_desktop(page)
+        w = _widget(page)
+        assert w.locator(".tcg-node").count() >= 2
+        assert w.locator(".tcg-card").count() == 0 and w.get_by_role("button", name="Next chain").count() == 0
+        link = page.locator('.trace-featured-wrap a[href^="/trace-evidence#chain="]')
+        expect(link).to_have_count(1)
+        assert page.evaluate("location.hash") == "", "the landing widget must not touch the URL"
 

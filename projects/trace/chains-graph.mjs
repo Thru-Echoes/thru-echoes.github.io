@@ -14,11 +14,44 @@
 const SVG = "http://www.w3.org/2000/svg";
 const REL = { revises: "revises", corrects: "corrects", builds_on: "builds on" };
 const REL_IN = { revises: "revised by", corrects: "corrected by", builds_on: "carried out in" };
+const MARKERS = ["revises", "corrects", "builds_on", "rules"];
 const REL_HELP = {
   revises: "a decision that replaces an earlier one",
   corrects: "a correction that points at the mistake",
   builds_on: "work that cites the decisions it carried out",
 };
+const WHO = { ai: "Agent", human: "Human", system: "System", not_recorded: "Unrecorded" };
+
+// A decision a human rejected or revised is drawn as two boxes: the proposal,
+// and the human's ruling (stored on the same record) pointing at it. Links
+// that revise or build on such a decision attach to the ruling, the later
+// state; corrections keep pointing at the proposal they correct.
+function expand(c) {
+  const rid = (id) => `${id}::ruling`;
+  const byId = new Map(c.nodes.map((n) => [n.id, n]));
+  const ruled = new Set(c.nodes.filter((n) => n.kind === "decision" && n.resolution).map((n) => n.id));
+  const nodes = [];
+  for (const n of c.nodes) {
+    if (!ruled.has(n.id)) {
+      nodes.push(n);
+      continue;
+    }
+    nodes.push({ ...n, split: true });
+    nodes.push({
+      id: rid(n.id), record: n.id, kind: "ruling", disposition: n.disposition, resolved_by: n.resolved_by,
+      headline: n.resolution, text: n.resolution, label: `${WHO[n.resolved_by] || "Unrecorded"} ${n.disposition}`,
+    });
+  }
+  const verb = (id) => (byId.get(id)?.disposition === "rejected" ? ["rejects", "rejected by"] : ["amends", "amended by"]);
+  const edges = c.edges.map((e) => (ruled.has(e.target) && e.relation !== "corrects" ? { ...e, target: rid(e.target) } : e));
+  for (const id of ruled) {
+    const [v, vIn] = verb(id);
+    edges.push({ source: rid(id), target: id, relation: "rules", verb: v, verbIn: vIn });
+  }
+  const key = ruled.has(c.key) ? rid(c.key) : c.key;
+  return { ...c, key, nodes, edges, records: c.nodes.length, links: c.edges.length, rulings: ruled.size };
+}
+
 const KIND = { decision: "Decision", correction: "Correction", annotation: "Annotation", contribution: "Contribution", external: "External" };
 
 function h(tag, attrs = {}, ...kids) {
@@ -42,6 +75,8 @@ function s(tag, attrs = {}) {
 // Who is shown on a node: decision = proposer then resolver; contribution = idea then builder.
 function actors(n) {
   const a = (t) => ({ ai: "agent", human: "human", collaborative: "shared" })[t] || "unrecorded";
+  if (n.kind === "ruling") return [a(n.resolved_by)];
+  if (n.kind === "decision" && n.split) return [a(n.proposed_by)];
   if (n.kind === "decision") return [a(n.proposed_by), n.disposition === "proposed" ? null : a(n.resolved_by)].filter(Boolean);
   if (n.kind === "contribution") return [a(n.direction), a(n.execution)];
   return [];
@@ -103,7 +138,8 @@ function edgePath(a, b, mode, span = 1, lane = 0) {
 }
 
 function render({ model, el }) {
-  const chains = model.get("chains") || [];
+  const chains = (model.get("chains") || []).map(expand);
+  const compact = Boolean(model.get("compact"));
   const projects = model.get("projects") || [];
   if (!chains.length) {
     el.append(h("p", {}, "No decision chains are published in this snapshot."));
@@ -111,10 +147,12 @@ function render({ model, el }) {
   }
   const state = { project: "all", chain: 0, node: null };
   let fromHash = "";
-  try {
-    fromHash = decodeURIComponent(location.hash || "").replace(/^#chain=/, "");
-  } catch (_) {
-    /* a malformed hash just selects the first chain */
+  if (!compact) {
+    try {
+      fromHash = decodeURIComponent(location.hash || "").replace(/^#chain=/, "");
+    } catch (_) {
+      /* a malformed hash just selects the first chain */
+    }
   }
   const hashIdx = chains.findIndex((c) => c.slug === fromHash);
   if (hashIdx >= 0) state.chain = hashIdx;
@@ -131,10 +169,12 @@ function render({ model, el }) {
     h("span", {}, h("i", { class: "tcg-dot a-agent" }), "agent"),
     h("span", {}, h("i", { class: "tcg-dot a-human" }), "human"),
     h("span", {}, h("i", { class: "tcg-dot a-shared" }), "shared"),
+    h("span", { title: "a human's rejection or revision of the proposal it points at" }, h("i", { class: "tcg-line r-rules" }), "human ruling"),
     ...Object.keys(REL).map((r) => h("span", { title: REL_HELP[r] }, h("i", { class: `tcg-line r-${r}` }), REL[r])),
   );
   const browse = h("h4", { class: "tcg-browse" }, "All chains");
-  root.append(head, stage, legend, detail, browse, filters, cards);
+  if (compact) root.classList.add("tcg-compact");
+  root.append(head, stage, legend, detail, ...(compact ? [] : [browse, filters, cards]));
   el.append(root);
 
   // Redraws rebuild buttons; keep keyboard focus on the matching control.
@@ -196,7 +236,7 @@ function render({ model, el }) {
     }
     for (const n of chain.nodes) {
       const [x, y] = pos.get(n.id);
-      g.append(s("circle", { cx: x, cy: y, r: n.id === chain.key ? 3.6 : 2.6, class: n.id === chain.key ? "key" : "" }));
+      g.append(s("circle", { cx: x, cy: y, r: n.id === chain.key ? 3.6 : 2.6, class: n.id === chain.key ? "key" : n.kind === "ruling" ? "ruling" : "" }));
     }
     return g;
   }
@@ -238,26 +278,31 @@ function render({ model, el }) {
     const v = visible();
     const at = v.findIndex(({ i }) => i === state.chain);
     const step = (d) => keepFocus(() => select(v[(at + d + v.length) % v.length].i));
-    const links = chain.edges.length;
+    const links = chain.links;
     head.replaceChildren(
-      h(
+      ...[h(
         "div",
         { class: "tcg-title" },
         h("h3", { id: `chain-${chain.slug}` }, chain.title),
         h(
           "p",
           {},
-          `${chain.project_name}, ${chain.when}. ${chain.nodes.length} ${chain.nodes.length === 1 ? "record" : "records"}, ${links} ${links === 1 ? "link" : "links"}.`,
+          `${chain.project_name}, ${chain.when}. ${chain.records} ${chain.records === 1 ? "record" : "records"}` +
+            (chain.rulings ? `, ${chain.rulings} human ${chain.rulings === 1 ? "ruling" : "rulings"}` : "") +
+            (links ? `, ${links} stored ${links === 1 ? "link" : "links"}` : "") +
+            ".",
           chain.unshown ? ` ${chain.unshown} further ${chain.unshown === 1 ? "link points" : "links point"} to records not shown.` : "",
         ),
       ),
-      h(
+      compact
+        ? null
+        : h(
         "div",
         { class: "tcg-nav" },
         h("button", { type: "button", class: "tcg-chip", onclick: () => step(-1), "aria-label": "Previous chain", "data-key": "nav:prev" }, "Previous"),
         h("span", { class: "tcg-count" }, `${at + 1} of ${v.length}`),
         h("button", { type: "button", class: "tcg-chip", onclick: () => step(1), "aria-label": "Next chain", "data-key": "nav:next" }, "Next"),
-      ),
+      )].filter(Boolean),
     );
   }
 
@@ -297,7 +342,7 @@ function render({ model, el }) {
     const sel = state.node ?? chain.key;
     const svg = s("svg", { class: "tcg-edges", width: W, height: H, viewBox: `0 0 ${W} ${H}`, "aria-hidden": "true" });
     const defs = s("defs");
-    for (const r of Object.keys(REL)) {
+    for (const r of MARKERS) {
       const m = s("marker", { id: `tcg-arrow-${r}`, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
       m.append(s("path", { d: "M0,0 L10,5 L0,10 z", class: `tcg-arrow r-${r}` }));
       defs.append(m);
@@ -313,7 +358,7 @@ function render({ model, el }) {
       const p = edgePath(a, b, mode, span, span > 1 ? lane++ : 0);
       const on = e.source === sel || e.target === sel;
       svg.append(s("path", { d: p.d, class: `tcg-edge r-${e.relation}${on ? " on" : ""}`, "marker-end": `url(#tcg-arrow-${e.relation})` }));
-      if (on) labels.push({ ...p, text: REL[e.relation], rel: e.relation });
+      if (on || e.relation === "rules") labels.push({ ...p, text: e.verb ?? REL[e.relation], rel: e.relation });
     }
     stage.append(svg);
 
@@ -337,12 +382,15 @@ function render({ model, el }) {
             });
           },
         },
-        h("span", { class: "tcg-node-top" }, h("span", { class: "tcg-kind" }, KIND[n.kind]), h("span", { class: "tcg-who" }, ...who.map((a) => h("i", { class: `tcg-dot a-${a}`, title: a })))),
+        h("span", { class: "tcg-node-top" }, h("span", { class: "tcg-kind" }, n.kind === "ruling" ? n.label : n.split ? `${WHO[n.proposed_by] || "Unrecorded"} proposal` : KIND[n.kind]), h("span", { class: "tcg-who" }, ...who.map((a) => h("i", { class: `tcg-dot a-${a}`, title: a })))),
         h("span", { class: "tcg-node-head" }, n.headline),
       );
       stage.append(node);
     }
-    for (const l of labels) stage.append(h("span", { class: `tcg-elabel r-${l.rel}`, style: `left:${l.mx}px;top:${l.my}px` }, l.text));
+    for (const l of labels) {
+      const x = mode === "list" ? Math.max(l.mx, 32) : l.mx; // keep gutter labels on screen
+      stage.append(h("span", { class: `tcg-elabel r-${l.rel}`, style: `left:${x}px;top:${l.my}px` }, l.text));
+    }
   }
 
   function para(line) {
@@ -362,32 +410,37 @@ function render({ model, el }) {
         drawDetail(chain);
       }, `node:${id}`);
     };
-    const linkList = (title, items, names) =>
+    const linkList = (title, items) =>
       items.length
         ? h(
             "div",
             { class: "tcg-rel" },
             h("span", { class: "tcg-rel-title" }, title),
-            ...items.map(([rel, id]) => h("button", { type: "button", class: "tcg-chip", onclick: go(id) }, `${names[rel]} `, h("span", { class: "tcg-mono" }, id), `: ${byId.get(id)?.headline.slice(0, 64) ?? ""}${(byId.get(id)?.headline.length ?? 0) > 64 ? "..." : ""}`)),
+            ...items.map(([rel, id]) => h("button", { type: "button", class: "tcg-chip", onclick: go(id) }, `${rel} `, h("span", { class: "tcg-mono" }, byId.get(id)?.record ? `${byId.get(id).record} ruling` : id), `: ${byId.get(id)?.headline.slice(0, 64) ?? ""}${(byId.get(id)?.headline.length ?? 0) > 64 ? "..." : ""}`)),
           )
         : null;
-    const outs = chain.edges.filter((e) => e.source === n.id).map((e) => [e.relation, e.target]);
-    const ins = chain.edges.filter((e) => e.target === n.id).map((e) => [e.relation, e.source]);
+    const outs = chain.edges.filter((e) => e.source === n.id).map((e) => [e.verb ?? REL[e.relation], e.target]);
+    const ins = chain.edges.filter((e) => e.target === n.id).map((e) => [e.verbIn ?? REL_IN[e.relation], e.source]);
     const body = n.url
       ? [h("p", {}, h("a", { href: n.url, target: "_blank", rel: "noopener" }, n.headline))]
-      : (n.text || n.headline).split("\n").filter((x) => x.trim()).map(para);
+      : n.kind === "ruling"
+        ? [h("p", {}, n.text)]
+        : (n.text || n.headline).split("\n").filter((x) => x.trim()).map(para);
+    const meta = n.kind === "ruling" ? `${n.label} (the ruling stored on this decision record)` : n.split ? n.label.replace(/,.*$/, "") : n.label;
     detail.replaceChildren(
-      ...[h("div", { class: "tcg-detail-meta" }, h("span", { class: "tcg-mono" }, n.id), ` ${n.label}`, n.text ? "" : n.url ? "" : h("span", { class: "tcg-muted" }, " (short excerpt from the record)")),
+      ...[h("div", { class: "tcg-detail-meta" }, h("span", { class: "tcg-mono" }, n.record ?? n.id), ` ${meta}`, n.text ? "" : n.url ? "" : h("span", { class: "tcg-muted" }, " (short excerpt from the record)")),
       h("blockquote", { class: "tcg-quote" }, ...body),
-      linkList("This record", outs, REL),
-      linkList("Linked from", ins, REL_IN)].filter(Boolean),
+      linkList("This record", outs),
+      linkList("Linked from", ins)].filter(Boolean),
     );
   }
 
   function update() {
     const chain = chains[state.chain];
-    drawFilters();
-    drawCards();
+    if (!compact) {
+      drawFilters();
+      drawCards();
+    }
     drawHead(chain);
     drawStage(chain);
     drawDetail(chain);

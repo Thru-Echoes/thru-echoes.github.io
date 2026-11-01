@@ -10,6 +10,7 @@ Exports:
     get_contrib_table_md(report) -> str  (_evidence_contributions.md)
     get_excerpts_md(report) -> str       (_evidence_excerpts.md, text version of the chains)
     get_graph_md(report) -> str          (_evidence_graph.md, interactive chain graph)
+    get_featured_md(report) -> str       (_evidence_featured.md, landing-page chain)
     get_node_label(node) -> str
 
 No side effects.
@@ -171,27 +172,51 @@ def get_excerpts_md(report: EvidenceReport) -> str:
                 if i < len(parts) - 1:
                     out.append(">\n")
             out.append("\n")
+            if n.resolution:
+                who = _ACTOR[n.resolved_by or "not_recorded"].capitalize()
+                out.append(f"> **{_esc(n.id)}, {who} {n.disposition}**\n>\n> {_esc(n.resolution)}\n\n")
         if x.edges:
             links = "; ".join(f"{_esc(e.source)} {_REL[e.relation]} {_esc(e.target)}" for e in x.edges)
             out.append(f"Links stored in these records: {links}.\n\n")
     return "".join(out)
 
 
+def _graph_block(model: dict[str, object], css_class: str) -> str:
+    body = json.dumps(model, ensure_ascii=True, separators=(",", ":"))
+    return f":::{{anywidget}} /projects/trace/chains-graph.mjs\n:css: /projects/trace/chains-graph.css\n:class: {css_class}\n{body}\n:::\n"
+
+
+def _chain_model(report: EvidenceReport, chains: list[Excerpt]) -> list[dict[str, object]]:
+    order = {p.key: i for i, p in enumerate(report.projects)}
+    return [
+        {
+            "slug": x.slug, "title": x.title, "project": x.project, "project_name": x.project_name,
+            "color": order.get(x.project, 0), "when": _when(x), "key": x.key_event_id,
+            "unshown": x.unshown_links,
+            "nodes": [{**n.model_dump(exclude_none=True), "label": get_node_label(n)} for n in x.nodes],
+            "edges": [e.model_dump() for e in x.edges],
+        }
+        for x in chains
+    ]  # fmt: skip
+
+
+def get_featured_md(report: EvidenceReport) -> str:
+    """The featured chain for the landing page, compact, with a link to all chains; '' if none."""
+    featured = [x for x in report.excerpts if x.featured]
+    if not featured:
+        return ""
+    model = {"compact": True, "projects": [], "chains": _chain_model(report, featured)}
+    n = len(report.excerpts)
+    return (
+        _graph_block(model, "trace-featured")
+        + f"\n[See all {n} decision chains →](/trace-evidence#chain={featured[0].slug})\n"
+    )
+
+
 def get_graph_md(report: EvidenceReport) -> str:
     """The interactive chain graph as a MyST anywidget block whose body is the chain data."""
-    order = {p.key: i for i, p in enumerate(report.projects)}
     model = {
         "projects": [{"slug": p.key, "name": p.name, "color": i} for i, p in enumerate(report.projects)],
-        "chains": [
-            {
-                "slug": x.slug, "title": x.title, "project": x.project, "project_name": x.project_name,
-                "color": order.get(x.project, 0), "when": _when(x), "key": x.key_event_id,
-                "unshown": x.unshown_links,
-                "nodes": [{**n.model_dump(exclude_none=True), "label": get_node_label(n)} for n in x.nodes],
-                "edges": [e.model_dump() for e in x.edges],
-            }
-            for x in report.excerpts
-        ],
-    }  # fmt: skip
-    body = json.dumps(model, ensure_ascii=True, separators=(",", ":"))
-    return f":::{{anywidget}} ./chains-graph.mjs\n:css: ./chains-graph.css\n:class: col-page-right\n{body}\n:::\n"
+        "chains": _chain_model(report, report.excerpts),
+    }
+    return _graph_block(model, "col-page-right")
