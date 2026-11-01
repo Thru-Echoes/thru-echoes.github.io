@@ -66,6 +66,9 @@
 .tcg-nav { display: flex; align-items: center; gap: 0.5rem; }
 
 /* graph */
+.tcg-scroll { overflow-x: auto; overflow-y: hidden; padding: 4px 4px 6px; margin: 0 -4px; }
+.tcg-hint { margin: -0.4rem 0 0.6rem; color: var(--muted); font-size: 0.78rem; }
+.tcg-hint[hidden] { display: none; }
 .tcg-stage { position: relative; width: 100%; margin: 0.25rem 0 0.75rem; }
 .tcg-edges { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
 .tcg-edge { fill: none; stroke: var(--line); stroke-width: 1.5; }

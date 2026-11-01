@@ -162,6 +162,10 @@ function render({ model, el }) {
   const cards = h("div", { class: "tcg-cards", role: "list" });
   const head = h("div", { class: "tcg-head" });
   const stage = h("div", { class: "tcg-stage" });
+  // The graph keeps its left-to-right layout down to phone width; when a long
+  // chain is wider than the column it scrolls sideways instead of stacking.
+  const scroller = h("div", { class: "tcg-scroll" }, stage);
+  const hint = h("p", { class: "tcg-hint", hidden: true }, "Scroll sideways to see the whole chain →");
   const detail = h("div", { class: "tcg-detail", "aria-live": "polite" });
   const legend = h(
     "div",
@@ -174,7 +178,7 @@ function render({ model, el }) {
   );
   const browse = h("h4", { class: "tcg-browse" }, "All chains");
   if (compact) root.classList.add("tcg-compact");
-  root.append(head, stage, legend, detail, ...(compact ? [] : [browse, filters, cards]));
+  root.append(head, scroller, hint, legend, detail, ...(compact ? [] : [browse, filters, cards]));
   el.append(root);
 
   // Redraws rebuild buttons; keep keyboard focus on the matching control.
@@ -308,16 +312,24 @@ function render({ model, el }) {
 
   function drawStage(chain) {
     stage.replaceChildren();
-    const W = stage.clientWidth || el.clientWidth || 640;
+    const avail = (scroller.clientWidth || el.clientWidth || 648) - 8; // minus the scroller's padding
     const cols = layoutColumns(chain);
-    const GX = 64, GY = 18, MIN_W = 158, MAX_W = 250;
-    const mode = cols.length * MIN_W + (cols.length - 1) * GX <= W ? "dag" : "list";
+    const n = cols.length;
+    const GY = 18, MIN_W = 136, MAX_W = 250, PHONE = 560;
+    const GX = Math.max(40, Math.min(64, (avail / n) * 0.22));
+    const fits = n * MIN_W + (n - 1) * GX <= avail;
+    const mode = fits || avail >= PHONE ? "dag" : "list";
+    let W = avail;
     const box = new Map();
     let H;
     let pad = 0;
     if (mode === "dag") {
-      const w = Math.min(MAX_W, (W - (cols.length - 1) * GX) / cols.length);
-      const nh = 118;
+      let w = Math.min(MAX_W, (avail - (n - 1) * GX) / n);
+      if (w < MIN_W) {
+        w = MIN_W;
+        W = n * w + (n - 1) * GX;
+      }
+      const nh = w < 170 ? 132 : 118;
       const rows = Math.max(...cols.map((c) => c.length));
       const colOf = new Map(cols.flatMap((list, c) => list.map((n) => [n.id, c])));
       const longs = chain.edges.filter((e) => colOf.get(e.source) - colOf.get(e.target) > 1).length;
@@ -337,6 +349,8 @@ function render({ model, el }) {
       order.forEach((n, r) => box.set(n.id, { x: gutter, y: r * (nh + GY), w: W - gutter, h: nh }));
     }
     stage.style.height = `${H}px`;
+    stage.style.width = W > avail ? `${W}px` : "";
+    hint.hidden = !(W > avail);
     stage.dataset.mode = mode;
 
     const sel = state.node ?? chain.key;
@@ -449,13 +463,13 @@ function render({ model, el }) {
   update();
   let last = 0;
   const ro = new ResizeObserver(() => {
-    const w = stage.clientWidth;
+    const w = scroller.clientWidth;
     if (Math.abs(w - last) > 4) {
       last = w;
       keepFocus(() => drawStage(chains[state.chain]));
     }
   });
-  ro.observe(stage);
+  ro.observe(scroller);
   return () => ro.disconnect();
 }
 
