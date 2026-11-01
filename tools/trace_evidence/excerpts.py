@@ -10,6 +10,8 @@ Approvals file (YAML, kept outside the repository):
           Verbatim approved text.
         approved: true
         approved_on: 2026-11-02
+        approved_by: owner
+        related_event_ids: [evt_013]   # optional; must be in the same session
 
 Errors carry a code and the entry index only, never ids or text, so a failing
 run cannot echo private content.
@@ -77,16 +79,26 @@ def get_excerpts(
         bucket, key = get_bucket(s, alias_map, allowlist, cutoff)
         if bucket != "included" or key is None:
             raise ExcerptError("session-out-of-scope", i)
-        if str(e.get("event_id")) not in {ev.id for ev in s.events}:
+        ids = {ev.id for ev in s.events}
+        if str(e.get("event_id")) not in ids:
             raise ExcerptError("event-not-in-session", i)
+        related = [str(r) for r in (e.get("related_event_ids") or [])]
+        if any(r not in ids for r in related):
+            raise ExcerptError("related-event-not-in-session", i)
+        if not str(e.get("approved_by") or "").strip():
+            raise ExcerptError("missing-approved-by", i)
         out.append(
             Excerpt(
                 event_id=str(e["event_id"]),
+                related_event_ids=related,
                 session_id=s.id,
                 project=allowlist[key].slug,
+                project_name=allowlist[key].name,
+                month=s.created.strftime("%Y-%m") if s.created else "unknown",
                 title=str(e["title"]).strip(),
                 text=str(e["text"]).strip(),
                 approved_on=e["approved_on"],
+                approved_by=str(e["approved_by"]).strip(),
             )
         )
     return out

@@ -26,7 +26,8 @@ from pathlib import Path
 import pytest
 
 from tools.trace_evidence.__main__ import PUBLIC_FILES, get_rendered
-from tools.trace_evidence.aggregate import get_report
+from tools.trace_evidence.aggregate import get_cutoff, get_report
+from tools.trace_evidence.excerpts import get_excerpts
 from tools.trace_evidence.load import get_alias_map, get_release_map, get_snapshot
 from tools.trace_evidence.models import EvidenceReport
 
@@ -72,7 +73,10 @@ def test_manifest_inputs_unchanged():
 def test_committed_outputs_regenerate_exactly():
     rm = get_release_map(PRIVATE / "release-map.json")
     snap = get_snapshot(STORE)
-    rep, diag = get_report(snap, get_alias_map(STORE / "projects.json"), COMMITTED.as_of, [], rm)
+    alias = get_alias_map(STORE / "projects.json")
+    approvals = PRIVATE / "approved_excerpts.yaml"
+    excerpts = get_excerpts(approvals if COMMITTED.excerpts else None, snap, alias, rm, get_cutoff(COMMITTED.as_of))
+    rep, diag = get_report(snap, alias, COMMITTED.as_of, excerpts, rm)
     assert set(diag.digests) == set(MANIFEST["sessions"])
     for rel, text in get_rendered(rep).items():
         assert (SITE / rel).read_text() == text, rel

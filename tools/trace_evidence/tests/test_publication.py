@@ -26,10 +26,12 @@ def test_all_public_files_committed():
         assert (SITE / p).is_file(), p
 
 
-def test_committed_json_matches_closed_schema_and_has_no_excerpts():
+def test_committed_json_matches_closed_schema_and_excerpts_are_approved():
     rep = _report()
     assert rep.schema_version == 2
-    assert rep.excerpts == []
+    for x in rep.excerpts:
+        assert x.approved_by.strip() and x.approved_on
+        assert x.project in {p.key for p in rep.projects}
 
 
 def test_committed_outputs_are_exactly_the_render_of_committed_json():
@@ -66,13 +68,16 @@ def test_page_copy_rules():
     for f in authored:
         text = f.read_text()
         assert "—" not in text and "–" not in text and " -- " not in text, f.name
-        assert not re.search(r"\b(verified|proven|tamper-evident|trustless)\b", text, re.I), f.name
-        assert not re.search(r"\b(applications?|accelerators?|investors?|fundrais\w*)\b", text, re.I), f.name
+        if f.name != "_evidence_excerpts.md":
+            # Claims about the records. Verbatim quotes use these words in their
+            # ordinary sense ("verified after fixes", "a Next.js application").
+            assert not re.search(r"\b(verified|proven|tamper-evident|trustless)\b", text, re.I), f.name
+            assert not re.search(r"\b(applications?|accelerators?|investors?|fundrais\w*)\b", text, re.I), f.name
 
 
 def test_page_includes_each_fragment_once():
     text = PAGE.read_text()
-    for frag in ("_evidence_claim.md", "_evidence_table.md", "_evidence_methods.md", "_evidence_contributions.md"):
+    for frag in ("_evidence_claim.md", "_evidence_table.md", "_evidence_methods.md", "_evidence_contributions.md", "_evidence_excerpts.md"):
         assert text.count(f"{{include}} {frag}") == 1, frag
 
 

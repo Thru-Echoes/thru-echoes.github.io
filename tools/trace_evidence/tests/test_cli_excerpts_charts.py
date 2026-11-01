@@ -68,7 +68,7 @@ def _report(store: Path) -> EvidenceReport:
 
 
 def _approvals(tmp_path: Path, **over: object) -> Path:
-    entry: dict[str, object] = {"event_id": "c1", "session_id": "s1", "title": "T", "text": "Approved words.", "approved": True, "approved_on": "2026-04-09"}
+    entry: dict[str, object] = {"event_id": "c1", "session_id": "s1", "title": "T", "text": "Approved words.", "approved": True, "approved_on": "2026-04-09", "approved_by": "owner"}
     entry.update(over)
     lines = ["excerpts:", "  - " + "\n    ".join(f"{k}: {json.dumps(v) if isinstance(v, str) and k != 'approved_on' else v}" for k, v in entry.items())]
     p = tmp_path / "private" / "approved.yaml"
@@ -165,6 +165,21 @@ def test_approved_excerpt_published(store, release_map, tmp_path):
     assert _cli(store, release_map, root, "--excerpts", str(_approvals(tmp_path))) == 0
     rep = EvidenceReport.model_validate_json((root / "static/evidence/evidence.json").read_text())
     assert [e.text for e in rep.excerpts] == ["Approved words."] and rep.excerpts[0].project == "acme"
+    md = (root / "projects/trace/_evidence_excerpts.md").read_text()
+    assert "### T" in md and "> Approved words." in md and "*Acme, March 2026*" in md
+
+
+def test_excerpt_parts_render_as_separate_labelled_paragraphs(store):
+    from datetime import date
+
+    from tools.trace_evidence.models import Excerpt
+    from tools.trace_evidence.render_md import get_excerpts_md
+
+    x = Excerpt(event_id="e", session_id="s", project="acme", project_name="Acme", month="2026-03", title="T",
+                text="Agent proposed: do X\nHuman rejected: no, because Y", approved_on=date(2026, 4, 9), approved_by="owner")  # fmt: skip
+    rep = _report(store).model_copy(update={"excerpts": [x]})
+    md = get_excerpts_md(rep)
+    assert "> **Agent proposed:** do X\n>\n> **Human rejected:** no, because Y\n" in md
 
 
 @pytest.mark.parametrize(
@@ -176,6 +191,7 @@ def test_approved_excerpt_published(store, release_map, tmp_path):
         ({"session_id": "s3"}, "session-out-of-scope"),
         ({"session_id": "nope"}, "session-not-found"),
         ({"event_id": "zzz"}, "event-not-in-session"),
+        ({"approved_by": ""}, "missing-approved-by"),
     ],
 )
 def test_bad_excerpt_rejected_without_echoing_content(store, release_map, tmp_path, capsys, over, code):

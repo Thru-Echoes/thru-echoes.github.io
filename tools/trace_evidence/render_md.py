@@ -8,6 +8,7 @@ Exports:
     get_table_md(report) -> str          (_evidence_table.md)
     get_methods_md(report) -> str        (_evidence_methods.md)
     get_contrib_table_md(report) -> str  (_evidence_contributions.md)
+    get_excerpts_md(report) -> str       (_evidence_excerpts.md)
 
 No side effects.
 """
@@ -15,7 +16,7 @@ No side effects.
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import date, datetime
 
 from .charts import CONTRIB_CATEGORIES, get_contrib_category
 from .models import EvidenceReport, ProjectStats
@@ -125,3 +126,22 @@ def get_contrib_table_md(report: EvidenceReport) -> str:
         return "| " + " | ".join(cells) + " |\n"
 
     return head + "".join(row(p) for p in report.projects) + row(report.totals, bold=True)
+
+
+def get_excerpts_md(report: EvidenceReport) -> str:
+    """Approved decision-chain excerpts, each as a heading, a source line, and a block quote."""
+    if not report.excerpts:
+        return "No excerpts are published in this snapshot.\n"
+    out: list[str] = []
+    for x in report.excerpts:
+        when = datetime.strptime(x.month, "%Y-%m").strftime("%B %Y") if x.month != "unknown" else "date not recorded"
+        out.append(f"### {_esc(x.title)}\n\n*{_esc(x.project_name)}, {when}*\n\n")
+        parts = [ln for ln in x.text.splitlines() if ln.strip()]
+        for i, line in enumerate(parts):
+            label, sep, rest = line.partition(": ")
+            body = f"**{_esc(label)}:** {_esc(rest)}" if sep and len(label) <= 60 else _esc(line)
+            out.append(f"> {body}\n")
+            if i < len(parts) - 1:
+                out.append(">\n")
+        out.append("\n")
+    return "".join(out)

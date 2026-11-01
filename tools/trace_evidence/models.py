@@ -186,12 +186,16 @@ class Coverage(_Out):
 
 
 class Excerpt(_Out):
-    event_id: str
+    event_id: str = Field(description="Seed event of the quoted chain.")
+    related_event_ids: list[str] = Field(default_factory=list, description="Other quoted events in the same session.")
     session_id: str
     project: str = Field(description="Public slug of the project the event belongs to.")
+    project_name: str
+    month: str = Field(description="Session start, YYYY-MM.")
     title: str
     text: str = Field(description="Approved text, copied verbatim from the approvals file.")
     approved_on: date
+    approved_by: str = Field(description="Who approved publication (the owner, or the owner's delegated panel).")
 
 
 class EvidenceReport(_Out):
