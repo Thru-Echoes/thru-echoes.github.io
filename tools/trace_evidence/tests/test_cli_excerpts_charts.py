@@ -45,8 +45,17 @@ def release_map(tmp_path: Path) -> Path:
     return p
 
 
-def _cli(store: Path, release_map: Path, root: Path, *extra: str) -> int:
+def _git_root(root: Path) -> Path:
+    import subprocess
+
     root.mkdir(exist_ok=True)
+    if not (root / ".git").exists():
+        subprocess.run(["git", "init", "-q", str(root)], check=True)
+    return root
+
+
+def _cli(store: Path, release_map: Path, root: Path, *extra: str) -> int:
+    _git_root(root)
     return main(
         ["--store", str(store), "--release-map", str(release_map), "--private-dir", str(release_map.parent),
          "--as-of", AS_OF, "--root", str(root), *extra]
@@ -71,7 +80,7 @@ def _approvals(tmp_path: Path, **over: object) -> Path:
 def test_cli_writes_exactly_public_files_and_private_outputs(store, release_map, tmp_path):
     root = tmp_path / "site"
     assert _cli(store, release_map, root) == 0
-    written = sorted(str(p.relative_to(root)) for p in root.rglob("*") if p.is_file())
+    written = sorted(str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and ".git" not in p.parts)
     assert written == sorted(str(p) for p in PUBLIC_FILES)
     rep = EvidenceReport.model_validate_json((root / "static/evidence/evidence.json").read_text())
     assert rep.coverage.sessions == 2 and rep.excerpts == []
@@ -96,10 +105,52 @@ def test_from_json_check_detects_drift(store, release_map, tmp_path):
     assert main(["--from-json", ev, "--check", "--root", str(root)]) == 1
 
 
-def test_private_dir_inside_worktree_refused(store, release_map, tmp_path, monkeypatch):
-    repo = Path(__file__).resolve().parents[3]
-    assert _cli(store, release_map, tmp_path / "site", "--private-dir", str(repo / "tmp-private")) == 3
-    assert not (repo / "tmp-private").exists()
+def test_private_dir_inside_worktree_refused(store, release_map, tmp_path):
+    root = tmp_path / "site"
+    assert _cli(store, release_map, root, "--private-dir", str(root / "static" / "private")) == 3
+    assert not (root / "static").exists()
+
+
+def test_root_outside_git_refused(store, release_map, tmp_path):
+    root = tmp_path / "nogit"
+    root.mkdir()
+    rc = main(["--store", str(store), "--release-map", str(release_map), "--private-dir", str(release_map.parent),
+               "--as-of", AS_OF, "--root", str(root)])  # fmt: skip
+    assert rc == 3 and not any(root.iterdir())
+
+
+def test_check_flag_rejected_in_store_mode(store, release_map, tmp_path):
+    with pytest.raises(SystemExit):
+        _cli(store, release_map, tmp_path / "site", "--check")
+    assert not (tmp_path / "site" / "static").exists()
+
+
+def test_naive_as_of_rejected(store, release_map, tmp_path):
+    root = _git_root(tmp_path / "site")
+    with pytest.raises(SystemExit):
+        main(["--store", str(store), "--release-map", str(release_map), "--private-dir", str(release_map.parent),
+              "--as-of", "2026-04-10T15:00:00", "--root", str(root)])  # fmt: skip
+
+
+def test_missing_sessions_dir_rejected_without_writing(release_map, tmp_path):
+    store = tmp_path / "emptystore"
+    store.mkdir()
+    (store / "projects.json").write_text('{"projects": {"acme": {"aliases": []}}}')
+    assert _cli(store, release_map, tmp_path / "site") == 2
+    assert not (tmp_path / "site" / "static").exists()
+
+
+def test_zero_included_sessions_refused(make_store, release_map, tmp_path):
+    store = make_store([session_dict("only", "clientco")])
+    assert _cli(store, release_map, tmp_path / "site") == 2
+    assert not (tmp_path / "site" / "static").exists()
+
+
+def test_malformed_approvals_yaml_rejected_without_echo(store, release_map, tmp_path, capsys):
+    bad = tmp_path / "private" / "approved.yaml"
+    bad.write_text("excerpts: [ {text: zz-canary-text, : : :\n")
+    assert _cli(store, release_map, tmp_path / "site", "--excerpts", str(bad)) == 2
+    assert "zz-canary-text" not in capsys.readouterr().err
 
 
 def test_cli_stdout_never_names_excluded_projects(store, release_map, tmp_path, capsys):
@@ -184,3 +235,8 @@ def test_contrib_categories_cover_every_pair():
 def test_contrib_svg_labels_n_per_project(store):
     svg = get_contrib_svg(_report(store), "light")
     assert "n = 4" in svg and "n = 0" in svg and "No recorded contributions" in svg
+
+
+def test_contrib_table_matches_pairs(store):
+    table = get_rendered(_report(store))["projects/trace/_evidence_contributions.md"]
+    assert "| Acme | 1 | 1 | 1 | 1 | 4 |" in table

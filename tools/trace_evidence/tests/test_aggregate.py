@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 import pytest
 
 from tools.trace_evidence.aggregate import get_identity, get_report
-from tools.trace_evidence.load import RegistryError, get_alias_map, get_snapshot
+from tools.trace_evidence.load import RegistryError, StoreError, get_alias_map, get_snapshot
 from tools.trace_evidence.models import SessionMeta
 
 from .conftest import TEST_ALLOWLIST, event, session_dict
@@ -245,3 +245,48 @@ def test_projects_in_allowlist_order_and_empty_omitted(make_store):
 def test_empty_project_omitted(make_store):
     rep, _ = _run(make_store([session_dict("s3", "beta")]))
     assert [p.key for p in rep.projects] == ["beta"]
+
+
+def test_missing_sessions_dir_raises(tmp_path):
+    with pytest.raises(StoreError):
+        get_snapshot(tmp_path)
+
+
+def test_conflicting_copy_that_fails_validation_still_quarantines(make_store):
+    a = session_dict("dup", "acme")
+    b = session_dict("dup", "acme", tags=["meeting"])
+    b["created"] = "not-a-timestamp"  # fails model validation
+    for order in ([a, b], [b, a]):
+        store = make_store(order)
+        snap = get_snapshot(store)
+        assert snap.conflicting_ids == 1 and snap.sessions == []
+        for f in (store / "sessions").glob("*.json"):
+            f.unlink()
+
+
+def test_waterfall_reconciles_for_aab_copies(make_store):
+    a = session_dict("dup", "acme")
+    b = session_dict("dup", "acme", tags=["x"])
+    store = make_store([a, a, b, session_dict("ok", "acme")])
+    snap = get_snapshot(store)
+    assert (snap.duplicate_copies, snap.conflicting_ids, snap.conflicting_files) == (0, 1, 3)
+    _, diag = _run(store)
+    assert _reconciles(snap.files_read, diag)
+
+
+def test_agent_proposal_crosstab(make_store):
+    evs = [
+        _decision("e1", "rejected", resolved="human", proposed="ai"),
+        _decision("e2", "revised", resolved="human", proposed="ai"),
+        _decision("e3", "revised", resolved="human", proposed="human"),
+        _decision("e4", "accepted", resolved="human", proposed="ai"),
+        _decision("e5", "rejected", resolved="ai", proposed="ai"),
+    ]
+    p = _run(make_store([session_dict("s1", "acme", events=evs)]))[0].projects[0]
+    assert p.agent_proposals == 4 and p.agent_proposals_rejected_or_revised == 2
+
+
+def test_duplicate_event_ids_reported(make_store):
+    evs = [_decision("e1", "accepted"), _decision("e1", "accepted")]
+    _, diag = _run(make_store([session_dict("s1", "acme", events=evs)]))
+    assert diag.duplicate_event_ids == 1

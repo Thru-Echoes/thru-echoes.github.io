@@ -354,9 +354,10 @@ class TestEvidencePage:
         page.goto(base_url + EVIDENCE)
         set_desktop(page)
         page.wait_for_load_state("networkidle")
-        rows = page.locator("article table tbody tr")
-        assert rows.count() >= 3, "summary table should list projects plus a totals row"
-        expect(page.locator("article table")).to_contain_text("All projects")
+        summary = page.locator("article table").first
+        assert summary.locator("tbody tr").count() >= 3, "summary table should list projects plus a totals row"
+        expect(summary).to_contain_text("All projects")
+        assert page.locator("article table").count() == 2, "summary and contribution tables"
         visible = page.evaluate(_VISIBLE_CHARTS)
         assert len(visible) == 2, f"exactly one variant per chart should show: {visible}"
         assert all(v["loaded"] for v in visible), f"chart image failed to load: {visible}"

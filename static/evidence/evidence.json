@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "as_of": "2026-11-01T00:10:36Z",
+  "as_of": "2026-11-01T00:24:48Z",
   "coverage": {
     "cutoff": "2026-10-31T00:00:00Z",
     "sessions": 267,
-    "max_created": "2026-10-29T19:40:38.159884Z",
+    "max_created": "2026-10-29",
     "format_versions": {
       "0.3.0": 36,
       "0.4.1": 76,
@@ -46,6 +46,8 @@
         "not_recorded": 49
       },
       "rejected_or_revised": 19,
+      "agent_proposals": 138,
+      "agent_proposals_rejected_or_revised": 17,
       "contributions": 266,
       "contributions_by_pair": {
         "ai→ai": 24,
@@ -88,6 +90,8 @@
         "not_recorded": 3
       },
       "rejected_or_revised": 1,
+      "agent_proposals": 5,
+      "agent_proposals_rejected_or_revised": 1,
       "contributions": 11,
       "contributions_by_pair": {
         "ai→ai": 1,
@@ -127,6 +131,8 @@
         "not_recorded": 37
       },
       "rejected_or_revised": 14,
+      "agent_proposals": 118,
+      "agent_proposals_rejected_or_revised": 10,
       "contributions": 136,
       "contributions_by_pair": {
         "ai→ai": 11,
@@ -167,6 +173,8 @@
         "not_recorded": 5
       },
       "rejected_or_revised": 3,
+      "agent_proposals": 46,
+      "agent_proposals_rejected_or_revised": 3,
       "contributions": 125,
       "contributions_by_pair": {
         "ai→ai": 3,
@@ -205,6 +213,8 @@
         "not_recorded": 15
       },
       "rejected_or_revised": 1,
+      "agent_proposals": 28,
+      "agent_proposals_rejected_or_revised": 1,
       "contributions": 46,
       "contributions_by_pair": {
         "ai→ai": 1,
@@ -247,6 +257,8 @@
       "not_recorded": 109
     },
     "rejected_or_revised": 38,
+    "agent_proposals": 335,
+    "agent_proposals_rejected_or_revised": 32,
     "contributions": 584,
     "contributions_by_pair": {
       "ai→ai": 40,

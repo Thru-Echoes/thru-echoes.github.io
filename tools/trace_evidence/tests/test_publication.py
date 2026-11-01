@@ -51,6 +51,9 @@ def test_totals_and_breakdowns_reconcile():
     assert sum(sum(w.counts.values()) for w in rep.weekly) == t.sessions
     assert all(set(w.counts) == {p.key for p in rep.projects} for w in rep.weekly)
     assert sum(rep.coverage.format_versions.values()) == t.sessions
+    for p in [*rep.projects, t]:
+        assert p.agent_proposals == p.proposed_by.get("ai", 0)
+        assert p.agent_proposals_rejected_or_revised <= min(p.rejected_or_revised, p.agent_proposals)
 
 
 def test_slugs_are_public_ids_only():
@@ -69,5 +72,23 @@ def test_page_copy_rules():
 
 def test_page_includes_each_fragment_once():
     text = PAGE.read_text()
-    for frag in ("_evidence_claim.md", "_evidence_table.md", "_evidence_methods.md"):
+    for frag in ("_evidence_claim.md", "_evidence_table.md", "_evidence_methods.md", "_evidence_contributions.md"):
         assert text.count(f"{{include}} {frag}") == 1, frag
+
+
+def test_managed_directories_hold_only_generated_files():
+    expected = {p.name for p in PUBLIC_FILES if p.parent == Path("static/evidence")}
+    assert {f.name for f in (SITE / "static/evidence").iterdir()} == expected
+    page_dir = {f.name for f in (SITE / "projects/trace").iterdir()}
+    assert page_dir == {p.name for p in PUBLIC_FILES if p.parent == Path("projects/trace")} | {"trace-evidence.md"}
+
+
+def test_synthetic_example_is_valid_linked_json():
+    import json
+
+    text = PAGE.read_text()
+    block = text[text.index("```json") + len("```json") : text.index("```", text.index("```json") + 7)]
+    events = json.loads(block)
+    ids = {e["id"] for e in events}
+    refs = {r for e in events for r in (e.get("contribution") or {}).get("related_decision_ids", [])}
+    assert refs and refs <= ids

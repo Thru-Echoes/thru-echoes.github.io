@@ -11,6 +11,9 @@ description: >-
 ```{include} _evidence_claim.md
 ```
 
+This is a self-logged snapshot of how I use my own tool, not an audit of
+shipped work or evidence of outside adoption.
+
 ## What TRACE records
 
 [TRACE](https://github.com/Thru-Echoes/TRACE) is an open-source MCP server I
@@ -30,8 +33,8 @@ records from five project workspaces, published by hand.
 ```
 
 **Sessions** counts recorded work sessions; **session starts** gives the first
-and last start date. **Rejected or revised** counts decision records where the
-proposal was turned down or changed before acceptance.
+and last start date. **Rejected or revised** counts decision records whose
+stored disposition is rejected or revised.
 
 ## Session starts by week
 
@@ -50,11 +53,15 @@ proposal was turned down or changed before acceptance.
 
 :::
 
+A week without session starts does not mean a week without work: one session
+can run for days, and this page covers five workspaces, not every project I
+work on. Weekly counts per project are in [evidence.json](/static/evidence/evidence.json).
+
 ## Who had the idea, who did the work
 
 Each contribution record names who had the idea (**direction**) and who
-carried it out (**execution**). In most of my records, I set the direction and
-the agent wrote the code.
+carried it out (**execution**). In most contribution records, the direction is
+human and the execution is AI.
 
 :::{div}
 :class: evidence-chart
@@ -71,35 +78,43 @@ the agent wrote the code.
 
 :::
 
+```{include} _evidence_contributions.md
+```
+
 ## What one record looks like
 
-The two events below are a **synthetic example** with made-up content, shown
-only to illustrate the fields that answer "who proposed, who decided, who
+The two linked events below are a **synthetic example** with made-up content,
+shown only to illustrate the fields that answer "who proposed, who decided, who
 built." They are not from my records.
 
 ```json
-{
-  "type": "decision",
-  "actor": {"type": "ai", "id": "assistant"},
-  "decision": {
-    "description": "Cache parsed config files in memory",
-    "rationale": "Config is re-read on every request",
-    "proposed_by": {"type": "ai"},
-    "disposition": "revised",
-    "resolved_by": {"type": "human"},
-    "revision_note": "Cache, but invalidate on file change"
+[
+  {
+    "id": "evt_001",
+    "type": "decision",
+    "actor": {"type": "ai", "id": "assistant"},
+    "decision": {
+      "description": "Cache parsed config files in memory",
+      "rationale": "Config is re-read on every request",
+      "proposed_by": {"type": "ai"},
+      "disposition": "revised",
+      "resolved_by": {"type": "human"},
+      "revision_note": "Cache, but invalidate on file change"
+    }
+  },
+  {
+    "id": "evt_002",
+    "type": "contribution",
+    "actor": {"type": "ai", "id": "assistant"},
+    "contribution": {
+      "description": "Config cache with file-change invalidation",
+      "artifact": "app/config_cache.py",
+      "direction": "collaborative",
+      "execution": "ai",
+      "related_decision_ids": ["evt_001"]
+    }
   }
-}
-{
-  "type": "contribution",
-  "contribution": {
-    "description": "Config cache with file-change invalidation",
-    "artifact": "app/config_cache.py",
-    "direction": "collaborative",
-    "execution": "ai",
-    "related_decision_ids": ["evt_001"]
-  }
-}
+]
 ```
 
 ## Methods and limits
@@ -109,8 +124,8 @@ built." They are not from my records.
   but the records are not independently checked.
 - **Scope.** Five project workspaces. Other projects in my TRACE store and all
   meeting recordings are excluded and not described here.
-- **Human entries.** Nearly all human entries are mine; fewer than 1% come from
-  collaborators on the co-owned and client projects.
+- **Human entries.** Human entries are mine, except in the co-owned and client
+  workspaces, where a few come from collaborators.
 - **Counting unit.** Counts are records, not distinct choices: a decision that
   is revised and then accepted can appear as more than one record. They measure
   recorded activity, not output, productivity, or quality.

@@ -166,16 +166,22 @@ def get_project_stats(display: ProjectDisplay, sessions: list[SessionRecord]) ->
     proposed: Counter[ActorType] = Counter()
     resolved: Counter[ActorType] = Counter()
     pairs: Counter[PairKey] = Counter()
-    corrections = discoveries = 0
+    corrections = discoveries = agent_proposals = agent_overridden = 0
     for s in sessions:
         for e in s.events:
             etype = _event_type(e.type)
             by_type[etype] += 1
             if etype == "decision":
                 d = e.decision
-                disposition[_disposition(d.disposition if d else None)] += 1
-                proposed[_actor(d.proposed_by.type if d and d.proposed_by else None)] += 1
-                resolved[_actor(d.resolved_by.type if d and d.resolved_by else None)] += 1
+                disp = _disposition(d.disposition if d else None)
+                prop = _actor(d.proposed_by.type if d and d.proposed_by else None)
+                res = _actor(d.resolved_by.type if d and d.resolved_by else None)
+                disposition[disp] += 1
+                proposed[prop] += 1
+                resolved[res] += 1
+                if prop == "ai":
+                    agent_proposals += 1
+                    agent_overridden += disp in ("rejected", "revised") and res == "human"
             elif etype == "contribution":
                 c = e.contribution
                 pair = f"{_party(c.direction if c else None)}→{_party(c.execution if c else None)}"
@@ -199,6 +205,8 @@ def get_project_stats(display: ProjectDisplay, sessions: list[SessionRecord]) ->
         proposed_by=dict(sorted(proposed.items())),
         resolved_by=dict(sorted(resolved.items())),
         rejected_or_revised=disposition["rejected"] + disposition["revised"],
+        agent_proposals=agent_proposals,
+        agent_proposals_rejected_or_revised=agent_overridden,
         contributions=by_type["contribution"],
         contributions_by_pair=dict(sorted(pairs.items())),
         corrections=corrections,
@@ -253,7 +261,7 @@ def get_report(
         coverage=Coverage(
             cutoff=cutoff,
             sessions=len(included),
-            max_created=max(inc_created) if inc_created else None,
+            max_created=max(inc_created).date() if inc_created else None,
             format_versions=dict(sorted(Counter(_version(s.trace_version) for s in included).items())),
             sessions_resolved_by_alias=sum(1 for s in included if not (s.metadata and s.metadata.project_key)),
         ),
@@ -276,6 +284,7 @@ def get_report(
         meetings=buckets["meeting"],
         recent=buckets["recent"],
         included=buckets["included"],
+        duplicate_event_ids=sum(len(s.events) - len({e.id for e in s.events}) for s in included),
         store_max_created=max(all_created) if all_created else None,
         digests={s.id: snapshot.digests[s.id] for s in sorted(included, key=lambda x: x.id)},
     )

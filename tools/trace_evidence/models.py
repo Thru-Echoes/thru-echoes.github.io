@@ -160,6 +160,10 @@ class ProjectStats(_Out):
     proposed_by: dict[ActorType, int]
     resolved_by: dict[ActorType, int] = Field(description="'not_recorded' when no resolver is stored.")
     rejected_or_revised: int
+    agent_proposals: int = Field(description="Decision records proposed by an AI actor.")
+    agent_proposals_rejected_or_revised: int = Field(
+        description="AI-proposed decision records whose stored disposition is rejected or revised by a human resolver."
+    )
     contributions: int
     contributions_by_pair: dict[PairKey, int] = Field(description="Keyed 'direction→execution'.")
     corrections: int
@@ -176,7 +180,7 @@ class Coverage(_Out):
 
     cutoff: datetime = Field(description="Sessions with activity at or after this instant are not included.")
     sessions: int
-    max_created: datetime | None = Field(description="Latest included session start.")
+    max_created: date | None = Field(description="UTC date of the latest included session start.")
     format_versions: dict[str, int] = Field(description="Included sessions per TRACE format version.")
     sessions_resolved_by_alias: int = Field(description="Included sessions lacking metadata.project_key.")
 
@@ -221,5 +225,6 @@ class Diagnostics(_Out):
     meetings: int
     recent: int
     included: int
+    duplicate_event_ids: int = Field(description="Repeated event ids within included sessions.")
     store_max_created: datetime | None
     digests: dict[str, str] = Field(description="Included session id -> sha256 of parsed bytes.")

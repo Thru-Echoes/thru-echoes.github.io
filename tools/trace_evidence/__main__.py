@@ -12,13 +12,13 @@ exactly what the committed evidence.json renders to):
     python -m tools.trace_evidence --from-json static/evidence/evidence.json --check
 
 Side effects:
-  * store mode writes the 8 PUBLIC_FILES (atomically: all are rendered and
+  * store mode writes the 9 PUBLIC_FILES (atomically: all are rendered and
     validated in a temp dir before any is replaced) and two private files,
     evidence-diagnostics.json and evidence-manifest.json, into --private-dir,
     which must be outside the git worktree;
-  * render mode writes the 7 rendered files, or with --check writes nothing
+  * render mode writes the rendered files, or with --check writes nothing
     and exits 1 if any committed file differs.
-Exit codes: 0 ok, 1 check failed, 2 excerpt rejected, 3 unsafe private dir.
+Exit codes: 0 ok, 1 check failed, 2 input rejected, 3 unsafe private dir.
 
 Exports: PUBLIC_FILES, get_rendered(report) -> dict[str, str], main(argv) -> int
 """
@@ -36,12 +36,14 @@ import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
 from pathlib import Path
 
+import yaml
+
 from .aggregate import get_cutoff, get_report
 from .charts import get_contrib_svg, get_weekly_svg
 from .excerpts import ExcerptError, get_excerpts
 from .load import get_alias_map, get_release_map, get_snapshot
 from .models import EvidenceReport
-from .render_md import get_claim_md, get_methods_md, get_table_md
+from .render_md import get_claim_md, get_contrib_table_md, get_methods_md, get_table_md
 
 OUT_DIR = Path("static/evidence")
 MD_DIR = Path("projects/trace")
@@ -54,6 +56,7 @@ PUBLIC_FILES: tuple[Path, ...] = (
     MD_DIR / "_evidence_claim.md",
     MD_DIR / "_evidence_table.md",
     MD_DIR / "_evidence_methods.md",
+    MD_DIR / "_evidence_contributions.md",
 )
 _BANNED = ("—", "–", " -- ")
 
@@ -74,6 +77,7 @@ def get_rendered(report: EvidenceReport) -> dict[str, str]:
         str(MD_DIR / "_evidence_claim.md"): get_claim_md(report),
         str(MD_DIR / "_evidence_table.md"): get_table_md(report),
         str(MD_DIR / "_evidence_methods.md"): get_methods_md(report),
+        str(MD_DIR / "_evidence_contributions.md"): get_contrib_table_md(report),
     }
 
 
@@ -105,12 +109,21 @@ def _write_atomic(root: Path, files: dict[str, str]) -> None:
             os.replace(src, dst)
 
 
-def _git_toplevel() -> Path | None:
+def _git_toplevel(root: Path) -> Path | None:
+    """The git worktree containing `root`, or None if `root` is not in one."""
     try:
-        out = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True)
+        out = subprocess.run(["git", "-C", str(root), "rev-parse", "--show-toplevel"], capture_output=True, text=True, check=True)
         return Path(out.stdout.strip()).resolve()
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
+
+
+def _parse_as_of(s: str) -> datetime:
+    """ISO timestamp with an explicit offset or Z; naive values are rejected."""
+    dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    if dt.tzinfo is None:
+        raise argparse.ArgumentTypeError("--as-of needs an explicit UTC offset or Z")
+    return dt
 
 
 def _sha(path: Path) -> str:
@@ -123,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--release-map", type=Path)
     ap.add_argument("--private-dir", type=Path)
     ap.add_argument("--excerpts", type=Path)
-    ap.add_argument("--as-of", type=lambda s: datetime.fromisoformat(s.replace("Z", "+00:00")))
+    ap.add_argument("--as-of", type=_parse_as_of)
     ap.add_argument("--root", type=Path, default=Path("."), help="site root to write into")
     ap.add_argument("--from-json", type=Path)
     ap.add_argument("--check", action="store_true")
@@ -141,33 +154,50 @@ def main(argv: list[str] | None = None) -> int:
         _write_atomic(root, files)
         return 0
 
+    if a.check:
+        ap.error("--check only applies with --from-json; store mode always writes")
     if a.release_map is None or a.private_dir is None:
         ap.error("store mode needs --release-map and --private-dir")
     private = a.private_dir.resolve()
-    top = _git_toplevel()
-    if top is not None and (private == top or top in private.parents):
-        print("refusing: --private-dir is inside the git worktree", file=sys.stderr)
+    top = _git_toplevel(root)
+    if top is None:
+        print("refusing: --root is not inside a git worktree", file=sys.stderr)
+        return 3
+    if private == top or top in private.parents or root == private or root in private.parents:
+        print("refusing: --private-dir is inside the site worktree", file=sys.stderr)
+        return 3
+    private_out = [private / "evidence-diagnostics.json", private / "evidence-manifest.json"]
+    if any(p.is_symlink() for p in private_out):
+        print("refusing: a private output path is a symlink", file=sys.stderr)
         return 3
     as_of = (a.as_of or datetime.now(UTC)).astimezone(UTC)
-    allowlist = get_release_map(a.release_map)
-    alias_map = get_alias_map(a.store / "projects.json")
-    snapshot = get_snapshot(a.store)
     try:
+        allowlist = get_release_map(a.release_map)
+        alias_map = get_alias_map(a.store / "projects.json")
+        snapshot = get_snapshot(a.store)
         excerpts = get_excerpts(a.excerpts, snapshot, alias_map, allowlist, get_cutoff(as_of))
     except ExcerptError as e:
-        print(f"excerpt rejected: {e}", file=sys.stderr)
+        print(f"input rejected: {e}", file=sys.stderr)
+        return 2
+    except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError) as e:
+        print(f"input rejected: {type(e).__name__}", file=sys.stderr)
         return 2
     report, diagnostics = get_report(snapshot, alias_map, as_of, excerpts, allowlist)
+    if report.coverage.sessions == 0:
+        print("input rejected: zero sessions included; refusing to publish an empty snapshot", file=sys.stderr)
+        return 2
     _write_atomic(root, get_rendered(report))
     private.mkdir(parents=True, exist_ok=True)
-    (private / "evidence-diagnostics.json").write_text(diagnostics.model_dump_json(indent=2) + "\n")
+    private_out[0].write_text(diagnostics.model_dump_json(indent=2) + "\n")
     manifest = {
         "as_of": as_of.isoformat(),
         "registry_sha256": _sha(a.store / "projects.json"),
         "release_map_sha256": _sha(a.release_map),
         "sessions": {sid: {"path": snapshot.paths[sid], "sha256": d} for sid, d in diagnostics.digests.items()},
     }
-    (private / "evidence-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    private_out[1].write_text(json.dumps(manifest, indent=2) + "\n")
+    for p in private_out:
+        p.chmod(0o600)
     print(f"wrote {len(PUBLIC_FILES)} public files; {diagnostics.included} sessions included")
     return 0
 

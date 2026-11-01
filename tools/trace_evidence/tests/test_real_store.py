@@ -56,8 +56,13 @@ def _norm(text: str) -> str:
 
 
 # ── frozen inputs ─────────────────────────────────────────────────────
+def test_private_terms_list_not_empty():
+    assert len(_private_terms()) >= 5, "private terms list is empty or truncated"
+
+
 def test_manifest_inputs_unchanged():
     assert _sha(STORE / "projects.json") == MANIFEST["registry_sha256"], "registry changed; regenerate"
+    assert _sha(PRIVATE / "release-map.json") == MANIFEST["release_map_sha256"], "release map changed; regenerate"
     changed = sum(_sha(Path(v["path"])) != v["sha256"] for v in MANIFEST["sessions"].values())
     assert changed == 0, f"{changed} included session file(s) changed since generation; regenerate"
 
@@ -125,16 +130,21 @@ def _publication_surface() -> dict[str, str]:
     """Repo-authored new/changed files plus the built site, if present."""
     files: dict[str, str] = {}
     changed = subprocess.run(
-        ["git", "diff", "--name-only", "origin/main", "--"], cwd=SITE, capture_output=True, text=True, check=True
-    ).stdout.split()
+        ["git", "diff", "-z", "--name-only", "origin/main", "--"], cwd=SITE, capture_output=True, text=True, check=True
+    ).stdout.split("\0")
     untracked = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard"], cwd=SITE, capture_output=True, text=True, check=True
-    ).stdout.split()
-    for rel in {*changed, *untracked, *(str(p) for p in PUBLIC_FILES)}:
+        ["git", "ls-files", "-z", "--others", "--exclude-standard"], cwd=SITE, capture_output=True, text=True, check=True
+    ).stdout.split("\0")
+    for rel in {*changed, *untracked, *(str(p) for p in PUBLIC_FILES)} - {""}:
         p = SITE / rel
-        if p.is_file():
+        files[f"path:{rel}"] = rel  # file names are publication content too
+        if p.is_file() and not p.is_symlink():
             files[f"repo:{rel}"] = p.read_text(errors="replace")
     build = SITE / "_build" / "html"
+    page = build / "trace-evidence" / "index.html"
+    if RELEASE:
+        assert page.is_file(), "release check needs a fresh `mystmd build --html` first"
+        assert page.stat().st_mtime >= (SITE / "static/evidence/evidence.json").stat().st_mtime, "build is older than evidence.json; rebuild"
     if build.is_dir():
         # Page content lives in .html and per-page .json; the theme's minified
         # JS bundles under build/ (and *.min.js) are fixed third-party code whose
@@ -160,7 +170,7 @@ def test_no_foreign_registry_names_published():
     surface = _publication_surface()
     bad = []
     for name, text in surface.items():
-        toks = forbidden - GENERIC_WORDS if name.startswith(("build:", "repo:")) else forbidden
+        toks = forbidden - GENERIC_WORDS
         if _token_hits(text, toks):
             bad.append(name)
     assert not bad, f"{len(bad)} file(s) contain a non-public registry name: {sorted(bad)[:10]}"
@@ -183,20 +193,26 @@ def test_no_private_terms_in_publication_surface():
     assert not bad, f"{len(bad)} file(s) contain a private term: {bad[:10]}"
 
 
+def _git(*args: str) -> str:
+    return subprocess.run(["git", *args], cwd=SITE, capture_output=True, text=True, check=True).stdout
+
+
 def test_no_private_terms_in_unpushed_commits():
-    log = subprocess.run(
-        ["git", "log", "-p", "--format=%an <%ae>%n%cn <%ce>%n%B", "origin/main..HEAD"],
-        cwd=SITE, capture_output=True, text=True, check=True,
-    ).stdout  # fmt: skip
-    # Removed lines ("-") already exist on origin/main; only added content,
-    # messages, and headers can newly disclose anything.
-    log = "\n".join(ln for ln in log.splitlines() if not (ln.startswith("-") and not ln.startswith("---")))
+    # Messages and identities are scanned whole. Patches are scanned for added
+    # lines only: removed lines ("-") already exist on origin/main.
+    messages = _git("log", "--format=%an%n%cn%n%B", "origin/main..HEAD")
+    patches = _git("log", "-p", "-m", "--format=", "origin/main..HEAD")
+    added = "\n".join(ln for ln in patches.splitlines() if not (ln.startswith("-") and not ln.startswith("---")))
     terms = _private_terms()
-    assert not any(_term_hit(log, t) for t in terms), "an unpushed commit (content, message, or header) contains a private term"
+    assert not any(_term_hit(messages, t) for t in terms), "an unpushed commit message or name contains a private term"
+    assert not any(_term_hit(added, t) for t in terms), "an unpushed commit adds a private term"
     reg = json.loads((STORE / "projects.json").read_text())["projects"]
     forbidden = {a.strip().lower() for k, v in reg.items() for a in [k, *(v.get("aliases") or [])]} - PUBLIC_OK_TOKENS - GENERIC_WORDS
-    assert _token_hits(log, forbidden) == 0, "an unpushed commit contains a non-public registry name"
-    idents = subprocess.run(
-        ["git", "log", "--format=%ae%n%ce", "origin/main..HEAD"], cwd=SITE, capture_output=True, text=True, check=True
-    ).stdout.split()
+    assert _token_hits(messages + "\n" + added, forbidden) == 0, "an unpushed commit contains a non-public registry name"
+    idents = _git("log", "--format=%ae%n%ce", "origin/main..HEAD").split()
     assert set(idents) <= {"omuellerklein@berkeley.edu"}, f"{len(set(idents))} unexpected commit identities"
+
+
+def test_no_duplicate_event_ids_in_included_sessions():
+    diag = json.loads((PRIVATE / "evidence-diagnostics.json").read_text())
+    assert diag["duplicate_event_ids"] == 0
