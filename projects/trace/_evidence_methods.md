@@ -1,0 +1,4 @@
+- **Snapshot.** Generated 2026-11-01 00:10 UTC. Sessions with any activity on or after 2026-10-31 (UTC) may still be in progress and are left for the next snapshot.
+- **Coverage.** 267 sessions across TRACE format versions 0.3.0 (36), 0.4.1 (76), 0.5.0 (76), 0.5.1 (79). 128 older sessions predate the canonical project key and were matched to their project through the TRACE alias registry.
+- **Open sessions.** 18 counted sessions were never formally closed; their events are counted as recorded.
+- **Resolution.** 109 of 430 decision records are still in the proposed state, and 109 have no recorded resolver. They are counted, not dropped.

@@ -27,6 +27,7 @@ project:
   # markdown in the repo root (planning docs, etc.) is ignored on purpose.
   toc:
     - file: index.md
+    - file: projects/trace/trace-evidence.md
     - file: projects/waggle/waggle.md
 
 site:
@@ -44,6 +45,8 @@ site:
     hide_toc: false
     hide_footer_links: false
   nav:
+    - title: TRACE evidence
+      url: /trace-evidence
     - title: Waggle
       url: /waggle
   actions:

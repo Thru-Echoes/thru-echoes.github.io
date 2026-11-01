@@ -545,3 +545,18 @@ html.dark a.diagram-fullscreen:hover {
     justify-content: center;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+ * TRACE evidence page: themed chart pairs (light/dark SVG files).
+ * Each chart ships twice; the theme class on <html> picks one. The
+ * figure scrolls inside itself on narrow screens so labels stay legible
+ * without widening the page.
+ * ───────────────────────────────────────────────────────────────── */
+.evidence-chart { overflow-x: auto; margin: 1rem 0 1.5rem; }
+.evidence-chart img { display: block; width: 100%; min-width: 560px; height: auto; }
+.evidence-chart .evidence-chart-dark,
+.evidence-chart img.evidence-chart-dark { display: none; }
+html.dark .evidence-chart .evidence-chart-light,
+html.dark .evidence-chart img.evidence-chart-light { display: none; }
+html.dark .evidence-chart .evidence-chart-dark,
+html.dark .evidence-chart img.evidence-chart-dark { display: block; }

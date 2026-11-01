@@ -23,6 +23,7 @@ semantic search, custom MCP tooling, and the full-stack applications
 that wrap them. Background in environmental science, geospatial data,
 and HPC.
 
+[TRACE evidence →](/trace-evidence) &nbsp;·&nbsp;
 [See Waggle →](/waggle) &nbsp;·&nbsp;
 [TRACE on GitHub →](https://github.com/Thru-Echoes/TRACE) &nbsp;·&nbsp;
 [Email](mailto:omuellerklein@berkeley.edu)
@@ -53,6 +54,7 @@ operational data. **Live app and architecture diagrams.**
   </div>
   <div class="trace-callout-actions">
     <a href="https://github.com/Thru-Echoes/TRACE" target="_blank" rel="noopener" class="trace-callout-button">★ Star on GitHub →</a>
+    <a href="/trace-evidence" class="trace-callout-button-secondary">See the evidence →</a>
     <a href="https://github.com/Thru-Echoes/TRACE/blob/main/docs/specification.md" target="_blank" rel="noopener" class="trace-callout-button-secondary">Read the spec ↗</a>
   </div>
 </div>
