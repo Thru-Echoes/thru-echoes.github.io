@@ -18,7 +18,7 @@ it carried out. Select a record to read it.
 
 Quotes are verbatim, except that other people's names are replaced with their
 role, dashes are normalized, and long passages are trimmed at "[...]". Records
-without a selected quote show their first sentence. The links are read from the
+without a selected quote show a short excerpt. The links are read from the
 records by the same code that builds [evidence.json](/static/evidence/evidence.json).
 
 :::{dropdown} All chains as text

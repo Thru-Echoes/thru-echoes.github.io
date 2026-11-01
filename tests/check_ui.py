@@ -431,7 +431,7 @@ class TestDecisionsPage:
         first = w.locator(".tcg-title h3").inner_text()
         w.get_by_role("button", name="Next chain").click()
         expect(w.locator(".tcg-title h3")).not_to_have_text(first)
-        assert page.evaluate("location.hash").startswith("#")
+        assert page.evaluate("location.hash").startswith("#chain=")
         w.locator(".tcg-card").first.click()
         expect(w.locator(".tcg-title h3")).to_have_text(first)
 
@@ -447,6 +447,46 @@ class TestDecisionsPage:
         page.reload()
         w = _widget(page)
         expect(w.locator(".tcg-title h3")).to_have_text(title)
+
+    def test_malformed_hash_still_renders(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS + "#%")
+        set_desktop(page)
+        w = _widget(page)
+        assert w.locator(".tcg-node").count() >= 1
+
+    def test_project_filter_limits_cards(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        total = w.locator(".tcg-card").count()
+        chip = w.locator(".tcg-filters .tcg-chip").nth(1)
+        chip.click()
+        expect(chip).to_have_attribute("aria-pressed", "true")
+        n = int(chip.locator(".tcg-count").inner_text())
+        expect(w.locator(".tcg-card")).to_have_count(n)
+        assert n <= total
+        assert page.evaluate("location.hash").startswith("#chain=")
+
+    def test_keyboard_focus_survives_redraw(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        nxt = w.get_by_role("button", name="Next chain")
+        nxt.focus()
+        page.keyboard.press("Enter")
+        key = page.evaluate("() => document.querySelector('.myst-anywidget').shadowRoot.activeElement?.dataset.key")
+        assert key == "nav:next"
+        node = w.locator(".tcg-node").last
+        node.focus()
+        page.keyboard.press("Enter")
+        key = page.evaluate("() => document.querySelector('.myst-anywidget').shadowRoot.activeElement?.dataset.key")
+        assert key and key.startswith("node:")
+
+    def test_cards_are_buttons_inside_list_items(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        assert w.locator('[role="list"] > [role="listitem"] > button.tcg-card').count() == w.locator(".tcg-card").count()
 
     def test_phone_uses_list_layout_without_page_scroll(self, page: Page, base_url: str):
         set_mobile(page)

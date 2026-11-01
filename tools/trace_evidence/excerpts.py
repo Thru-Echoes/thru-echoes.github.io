@@ -23,7 +23,8 @@ Approvals file (YAML, kept outside the repository):
 The approvals file supplies only text. Node metadata (kind, who proposed,
 disposition, who resolved, direction, execution) and every edge come from
 the records themselves: a decision's `revises_event_id`, a correction's
-`corrects_event_ids`, a contribution's `related_decision_ids`. A link whose
+`corrects_event_ids` (corrections only), a contribution's
+`related_decision_ids`. A link whose
 target is not shown is counted in `unshown_links`, never drawn.
 
 Errors carry a code and the entry index only, never ids or text, so a failing
@@ -86,7 +87,7 @@ def get_links(ev: EventRecord) -> list[tuple[Relation, str]]:
     """Outgoing links stored in one record, in stored order. Pure."""
     if ev.type == "decision" and ev.decision:
         return [("revises", t) for t in _ids(ev.decision.revises_event_id)]
-    if ev.type == "annotation" and ev.annotation:
+    if ev.type == "annotation" and ev.annotation and ev.annotation.category == "correction":
         return [("corrects", t) for t in _ids(ev.annotation.corrects_event_ids)]
     if ev.type == "contribution" and ev.contribution:
         return [("builds_on", t) for t in _ids(ev.contribution.related_decision_ids)]
@@ -122,6 +123,26 @@ def _node(ev: EventRecord, headline: str, text: str | None) -> ChainNode | None:
     return None
 
 
+def _has_cycle(edges: list[ChainEdge]) -> bool:
+    """True if the drawn links contain a self-link or a cycle (the graph must be acyclic). Pure."""
+    out: dict[str, list[str]] = {}
+    for e in edges:
+        out.setdefault(e.source, []).append(e.target)
+    state: dict[str, int] = {}  # 1 = on the current path, 2 = done
+
+    def visit(n: str) -> bool:
+        if state.get(n) == 1:
+            return True
+        if state.get(n) == 2:
+            return False
+        state[n] = 1
+        found = any(visit(t) for t in out.get(n, []))
+        state[n] = 2
+        return found
+
+    return any(visit(n) for n in list(out))
+
+
 def _clean(v: object) -> str:
     return str(v or "").strip()
 
@@ -138,8 +159,9 @@ def get_excerpts(
     Returns [] when `path` is None or does not exist. Raises ExcerptError for
     any entry that is not `approved: true` with an `approved_on` date and an
     `approved_by`, lacks a title or nodes, names an event outside an included
-    (allowlisted, non-meeting, stable) session, repeats a node, or lists an
-    external reference that no shown record stores.
+    (allowlisted, non-meeting, stable) session, repeats a node or an external
+    reference, lists an external reference that no shown record stores, or
+    whose drawn links contain a self-link or a cycle.
     """
     if path is None or not path.exists():
         return []
@@ -201,6 +223,8 @@ def get_excerpts(
                 raise ExcerptError("bad-external", i)
             if ref not in stored_refs:
                 raise ExcerptError("external-not-in-records", i)
+            if ref in ext_ids:
+                raise ExcerptError("duplicate-external", i)
             ext_ids[ref] = f"ext-{j + 1}"
             nodes.append(ChainNode(id=ext_ids[ref], kind="external", headline=label, url=f"https://{m.group(1)}"))
 
@@ -213,6 +237,9 @@ def get_excerpts(
                     unshown += 1
                 else:
                     edges.append(ChainEdge(source=src, target=target, relation=rel))
+
+        if _has_cycle(edges):
+            raise ExcerptError("cyclic-links", i)
 
         slug = get_slug(title)
         if slug in slugs:

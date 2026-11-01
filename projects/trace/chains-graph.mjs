@@ -79,7 +79,7 @@ function layoutColumns(chain) {
     }
     list.forEach(({ n }, r) => row.set(n.id, r - (list.length - 1) / 2));
   });
-  return cols.map((list) => list.map(({ n }) => n));
+  return cols.filter(Boolean).map((list) => list.map(({ n }) => n));
 }
 
 function edgePath(a, b, mode, span = 1, lane = 0) {
@@ -110,7 +110,12 @@ function render({ model, el }) {
     return;
   }
   const state = { project: "all", chain: 0, node: null };
-  const fromHash = decodeURIComponent((location.hash || "").slice(1));
+  let fromHash = "";
+  try {
+    fromHash = decodeURIComponent(location.hash || "").replace(/^#chain=/, "");
+  } catch (_) {
+    /* a malformed hash just selects the first chain */
+  }
   const hashIdx = chains.findIndex((c) => c.slug === fromHash);
   if (hashIdx >= 0) state.chain = hashIdx;
 
@@ -132,6 +137,18 @@ function render({ model, el }) {
   root.append(head, stage, legend, detail, browse, filters, cards);
   el.append(root);
 
+  // Redraws rebuild buttons; keep keyboard focus on the matching control.
+  const shadow = el.getRootNode();
+  function keepFocus(fn, nextKey) {
+    const active = shadow.activeElement;
+    const inside = active && root.contains(active);
+    const key = nextKey ?? (inside ? active.dataset.key : null);
+    fn();
+    if (!key || (!inside && nextKey == null)) return;
+    const target = [...root.querySelectorAll("[data-key]")].find((x) => x.dataset.key === key);
+    target?.focus({ preventScroll: true });
+  }
+
   const visible = () => chains.map((c, i) => ({ c, i })).filter(({ c }) => state.project === "all" || c.project === state.project);
 
   function drawFilters() {
@@ -146,12 +163,12 @@ function render({ model, el }) {
             class: "tcg-chip",
             type: "button",
             "aria-pressed": state.project === p.slug ? "true" : "false",
+            "data-key": `filter:${p.slug}`,
             onclick: () => {
               state.project = p.slug;
               const v = visible();
-              if (!v.some(({ i }) => i === state.chain)) state.chain = v[0].i;
-              state.node = null;
-              update();
+              if (v.some(({ i }) => i === state.chain)) keepFocus(update);
+              else keepFocus(() => select(v[0].i), `filter:${p.slug}`);
             },
           },
           p.name,
@@ -187,23 +204,22 @@ function render({ model, el }) {
   function drawCards() {
     cards.replaceChildren();
     for (const { c, i } of visible()) {
-      cards.append(
-        h(
-          "button",
-          {
-            class: "tcg-card",
-            type: "button",
-            role: "listitem",
-            "aria-current": i === state.chain ? "true" : "false",
-            onclick: () => {
-              select(i);
-              head.scrollIntoView({ behavior: "smooth", block: "start" });
-            },
+      const card = h(
+        "button",
+        {
+          class: "tcg-card",
+          type: "button",
+          "aria-current": i === state.chain ? "true" : "false",
+          "data-key": `card:${c.slug}`,
+          onclick: () => {
+            keepFocus(() => select(i), `node:${c.key}`);
+            head.scrollIntoView({ behavior: "smooth", block: "start" });
           },
-          glyph(c),
-          h("span", { class: "tcg-card-text" }, h("span", { class: "tcg-card-title" }, c.title), h("span", { class: "tcg-card-meta" }, `${c.project_name}, ${c.when}`)),
-        ),
+        },
+        glyph(c),
+        h("span", { class: "tcg-card-text" }, h("span", { class: "tcg-card-title" }, c.title), h("span", { class: "tcg-card-meta" }, `${c.project_name}, ${c.when}`)),
       );
+      cards.append(h("div", { role: "listitem", class: "tcg-card-item" }, card));
     }
   }
 
@@ -211,7 +227,7 @@ function render({ model, el }) {
     state.chain = i;
     state.node = null;
     try {
-      history.replaceState(null, "", `#${chains[i].slug}`);
+      history.replaceState(null, "", `#chain=${chains[i].slug}`);
     } catch (_) {
       /* hash sync is a convenience only */
     }
@@ -221,7 +237,7 @@ function render({ model, el }) {
   function drawHead(chain) {
     const v = visible();
     const at = v.findIndex(({ i }) => i === state.chain);
-    const step = (d) => select(v[(at + d + v.length) % v.length].i);
+    const step = (d) => keepFocus(() => select(v[(at + d + v.length) % v.length].i));
     const links = chain.edges.length;
     head.replaceChildren(
       h(
@@ -238,9 +254,9 @@ function render({ model, el }) {
       h(
         "div",
         { class: "tcg-nav" },
-        h("button", { type: "button", class: "tcg-chip", onclick: () => step(-1), "aria-label": "Previous chain" }, "Previous"),
+        h("button", { type: "button", class: "tcg-chip", onclick: () => step(-1), "aria-label": "Previous chain", "data-key": "nav:prev" }, "Previous"),
         h("span", { class: "tcg-count" }, `${at + 1} of ${v.length}`),
-        h("button", { type: "button", class: "tcg-chip", onclick: () => step(1), "aria-label": "Next chain" }, "Next"),
+        h("button", { type: "button", class: "tcg-chip", onclick: () => step(1), "aria-label": "Next chain", "data-key": "nav:next" }, "Next"),
       ),
     );
   }
@@ -312,10 +328,13 @@ function render({ model, el }) {
           style: `left:${b.x}px;top:${b.y}px;width:${b.w}px;height:${b.h}px`,
           "aria-pressed": n.id === sel ? "true" : "false",
           "aria-label": `${n.label}: ${n.headline}`,
+          "data-key": `node:${n.id}`,
           onclick: () => {
             state.node = n.id;
-            drawStage(chain);
-            drawDetail(chain);
+            keepFocus(() => {
+              drawStage(chain);
+              drawDetail(chain);
+            });
           },
         },
         h("span", { class: "tcg-node-top" }, h("span", { class: "tcg-kind" }, KIND[n.kind]), h("span", { class: "tcg-who" }, ...who.map((a) => h("i", { class: `tcg-dot a-${a}`, title: a })))),
@@ -338,8 +357,10 @@ function render({ model, el }) {
     const byId = new Map(chain.nodes.map((x) => [x.id, x]));
     const go = (id) => () => {
       state.node = id;
-      drawStage(chain);
-      drawDetail(chain);
+      keepFocus(() => {
+        drawStage(chain);
+        drawDetail(chain);
+      }, `node:${id}`);
     };
     const linkList = (title, items, names) =>
       items.length
@@ -356,7 +377,7 @@ function render({ model, el }) {
       ? [h("p", {}, h("a", { href: n.url, target: "_blank", rel: "noopener" }, n.headline))]
       : (n.text || n.headline).split("\n").filter((x) => x.trim()).map(para);
     detail.replaceChildren(
-      ...[h("div", { class: "tcg-detail-meta" }, h("span", { class: "tcg-mono" }, n.id), ` ${n.label}`, n.text ? "" : n.url ? "" : h("span", { class: "tcg-muted" }, " (first sentence of the record)")),
+      ...[h("div", { class: "tcg-detail-meta" }, h("span", { class: "tcg-mono" }, n.id), ` ${n.label}`, n.text ? "" : n.url ? "" : h("span", { class: "tcg-muted" }, " (short excerpt from the record)")),
       h("blockquote", { class: "tcg-quote" }, ...body),
       linkList("This record", outs, REL),
       linkList("Linked from", ins, REL_IN)].filter(Boolean),
@@ -378,7 +399,7 @@ function render({ model, el }) {
     const w = stage.clientWidth;
     if (Math.abs(w - last) > 4) {
       last = w;
-      drawStage(chains[state.chain]);
+      keepFocus(() => drawStage(chains[state.chain]));
     }
   });
   ro.observe(stage);

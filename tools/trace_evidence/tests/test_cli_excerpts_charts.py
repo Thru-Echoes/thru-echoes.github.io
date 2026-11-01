@@ -264,6 +264,8 @@ def test_malformed_link_fields_neither_break_parsing_nor_draw_edges(make_store, 
         ({"key_event_id": "c1", "nodes": [{"event_id": "d1", "headline": "h"}]}, "key-event-not-a-node"),
         ({"external": [{"ref": "external:github.com/acme/other/pull/1", "label": "x"}]}, "external-not-in-records"),
         ({"external": [{"ref": "javascript:alert(1)", "label": "x"}]}, "bad-external"),
+        ({"external": [{"ref": "external:http://github.com/acme/repo/pull/7", "label": "x"}]}, "bad-external"),
+        ({"key_event_id": "a1", "nodes": [{"event_id": "a1", "headline": "h"}], "external": _EXT * 2}, "duplicate-external"),
         ({"external": [{"ref": "external:github.com/acme/repo/pull/7", "label": ""}]}, "bad-external"),
     ],
 )
@@ -275,6 +277,35 @@ def test_bad_excerpt_rejected_without_echoing_content(chain_store, release_map, 
     assert rc == 2 and code in err
     assert "Approved words" not in err and "s1" not in err.replace("entry", "") and "github" not in err
     assert not (tmp_path / "site" / "static").exists()
+
+
+def test_self_links_and_cycles_are_rejected(make_store, release_map, tmp_path, capsys):
+    loop = [_dec("d1", "ai", "accepted", "human", revises="d1")]
+    cyc = [_dec("d1", "ai", "accepted", "human", revises="d2"), _dec("d2", "ai", "accepted", "human", revises="d1")]
+    for evs, nodes in ((loop, ["d1"]), (cyc, ["d1", "d2"])):
+        st = make_store([session_dict("s1", "acme", events=evs)])
+        rc, _ = _chain(st, release_map, tmp_path, key_event_id="d1", nodes=[{"event_id": n, "headline": "h"} for n in nodes])
+        assert rc == 2 and "cyclic-links" in capsys.readouterr().err
+
+
+def test_duplicate_titles_are_rejected(chain_store, release_map, tmp_path, capsys):
+    import yaml
+
+    one = {"session_id": "s1", "title": "Same title", "key_event_id": "d1", "nodes": [{"event_id": "d1", "headline": "h"}],
+           "approved": True, "approved_on": date(2026, 4, 9), "approved_by": "owner"}  # fmt: skip
+    p = tmp_path / "private" / "approved.yaml"
+    p.write_text(yaml.safe_dump({"excerpts": [one, {**one, "title": "Same, title!"}]}))
+    assert _cli(chain_store, release_map, tmp_path / "site", "--excerpts", str(p)) == 2
+    assert "duplicate-title" in capsys.readouterr().err
+
+
+def test_only_corrections_draw_corrects_links(make_store, release_map, tmp_path):
+    evs = [_dec("d1", "ai", "accepted", "human"),
+           event("g1", "annotation", annotation={"category": "gotcha", "corrects_event_ids": ["d1"]})]  # fmt: skip
+    st = make_store([session_dict("s1", "acme", events=evs)])
+    nodes = [{"event_id": "d1", "headline": "h"}, {"event_id": "g1", "headline": "h"}]
+    rc, x = _chain(st, release_map, tmp_path, key_event_id="d1", nodes=nodes)
+    assert rc == 0 and x is not None and x.edges == [] and x.nodes[1].kind == "annotation"
 
 
 def test_external_ref_must_be_stored_by_a_shown_record(chain_store, release_map, tmp_path):
