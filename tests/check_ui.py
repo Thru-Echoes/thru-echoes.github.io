@@ -335,3 +335,56 @@ class TestDarkModeRender:
         expect(img).to_be_visible()
         w = img.evaluate("el => el.clientWidth")
         assert w > 200, f"Expected portrait ≥200px wide, got {w}"
+
+
+# ─────────────────────────────────────────────────────────────────────
+# TRACE evidence page: table, themed chart pairs, phone width
+# ─────────────────────────────────────────────────────────────────────
+
+EVIDENCE = "/trace-evidence"
+_VISIBLE_CHARTS = """
+() => Array.from(document.querySelectorAll('.evidence-chart img'))
+  .filter(i => getComputedStyle(i).display !== 'none')
+  .map(i => ({cls: i.className, loaded: i.complete && i.naturalWidth > 0}))
+"""
+
+
+class TestEvidencePage:
+    def test_page_renders_table_and_charts(self, page: Page, base_url: str):
+        page.goto(base_url + EVIDENCE)
+        set_desktop(page)
+        page.wait_for_load_state("networkidle")
+        summary = page.locator("article table").first
+        assert summary.locator("tbody tr").count() >= 3, "summary table should list projects plus a totals row"
+        expect(summary).to_contain_text("All projects")
+        assert page.locator("article table").count() == 2, "summary and contribution tables"
+        visible = page.evaluate(_VISIBLE_CHARTS)
+        assert len(visible) == 2, f"exactly one variant per chart should show: {visible}"
+        assert all(v["loaded"] for v in visible), f"chart image failed to load: {visible}"
+
+    def test_dark_toggle_swaps_chart(self, page: Page, base_url: str):
+        page.goto(base_url + EVIDENCE)
+        set_desktop(page)
+        page.wait_for_load_state("networkidle")
+        before = page.evaluate(_VISIBLE_CHARTS)
+        start_dark = "dark" in html_classes(page)
+        btn = page.get_by_label("Toggle theme between light and dark mode")
+        prev = html_classes(page)
+        btn.click()
+        page.wait_for_function("prev => document.documentElement.className !== prev", arg=prev, timeout=3000)
+        after = page.evaluate(_VISIBLE_CHARTS)
+        want = "evidence-chart-light" if start_dark else "evidence-chart-dark"
+        assert len(after) == 2 and all(want in v["cls"] for v in after), f"{before} -> {after}"
+        assert all(v["loaded"] for v in after)
+
+    def test_no_horizontal_page_scroll_on_phone(self, page: Page, base_url: str):
+        set_mobile(page)
+        page.goto(base_url + EVIDENCE)
+        page.wait_for_load_state("networkidle")
+        sw, iw = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
+        assert sw <= iw, f"page scrolls horizontally: scrollWidth={sw} innerWidth={iw}"
+
+    def test_home_links_to_evidence(self, page: Page, base_url: str):
+        page.goto(base_url + LANDING)
+        set_desktop(page)
+        assert page.locator('a[href="/trace-evidence"]').count() >= 2

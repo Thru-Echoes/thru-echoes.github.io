@@ -1,12 +1,12 @@
 # echoes-portfolio: Claude Code instructions
 
 Personal portfolio site for **Oliver Muellerklein**, built with [MyST](https://mystmd.org)
-(Jupyter Book 2). Static site, intended to be hosted free on GitHub Pages or
-Cloudflare Pages. Public repo, public site.
+(Jupyter Book 2). Static site, deployed to GitHub Pages at
+`https://thru-echoes.github.io` (see Deploy below). Public repo, public site.
 
-> Long-form context, decisions, and rationale live in
-> [`notes/PORTFOLIO_PLAN.md`](notes/PORTFOLIO_PLAN.md) (local only, gitignored).
-> Read that for *why*; this file is *how*.
+> This file is the public *how*: build, test, deploy, routing, and copy rules.
+> Planning notes and private context live in the maintainer's local workspace,
+> outside this repo.
 
 ---
 
@@ -17,9 +17,8 @@ This repo is **the portfolio site itself**, not the projects it links to.
 - **In scope:** site structure, copy, theme, build pipeline, deploy config, the
   test suites in `tests/`, project-page templates.
 - **Out of scope:** building, hosting, or maintaining the projects the site
-  features. Meridian / Waggle, TRACE, REAP, a collaborator's paper, the AI-art paper,
-  etc. each live in their own repos elsewhere on this machine. This site links
-  *out* to them; it doesn't contain their code.
+  features. Each lives in its own repo. This site links *out* to them; it
+  doesn't contain their code.
 
 If a request appears to blur this line, ask before scope-creeping. The user has
 flagged scope drift as a recurring failure mode in this project.
@@ -41,8 +40,8 @@ must follow this rubric. Internal commit messages and code comments are exempt.
   and list intros, parentheses for parenthetical asides, and a plain
   hyphen `-` only where neither flows. No em dashes (`—`) in site copy
   or in PR / commit prose.
-- Site copy stays in formal-register (anchor: your formal-email anchor).
-  Lowercase / Slack-casual is from chat only and does not transfer.
+- Site copy stays in formal register. Lowercase / Slack-casual is from chat
+  only and does not transfer.
 
 **Anti-patterns, never write these:**
 - AI filler: *"Happy to talk about"*, *"I'd be happy to"*, *"Hope that helps"*,
@@ -53,42 +52,28 @@ must follow this rubric. Internal commit messages and code comments are exempt.
 - Self-deprecation. Emoji unless explicitly requested.
 - Generic enthusiasm in CTAs.
 
-The full verbatim-grounded voice profile is in this user's local memory at
-`memory/user_voice.md` (loaded automatically via `MEMORY.md`). When drafting
-copy, treat it as the rubric, not as inspiration.
-
 ---
 
-## Audience and framing: read carefully
+## Framing
 
-This portfolio's **first audience** is a private dev-skills evaluation by a
-specific person who is gauging you as a technical co-founder for an ESG
-startup raise. Public site, but the writing target is "senior engineer / founding
-team material," not "general visitor."
+The writing target is "senior engineer / founding team material," not
+"general visitor."
 
 **Lead with dev.** Hero, project order, and CTAs all foreground full-stack
 agentic-systems engineering and MCP tooling. PhD identity is a *credibility
 layer underneath*, not the headline.
 
-- **v1 selected-work scope** (ship fast): **Waggle** (agentic MCP CRM,
-  flagship) and **TRACE** (custom MCP server, framed as product not paper).
-  **Only these two.** Deferred to v2+: Corp-Sus Report Extractor, REAP,
-  trace-meeting-recorder, all papers and publications. Don't add or
-  reintroduce deferred items without explicit go-ahead.
+- **Selected work:** **Waggle** (agentic MCP CRM, flagship) and **TRACE**
+  (custom MCP server, framed as product not paper), plus the TRACE evidence
+  page. Don't add other projects without explicit go-ahead.
 - About: "I build agentic systems and MCP tooling. Currently finishing a PhD
   applying these methods to environmental and social-science problems."
 - CTA: founding-team / senior engineering roles in agentic systems for
-  sustainability / ESG / environmental applications. **Do not name** the
-  specific private opportunity, the company, or the people involved.
-
-**the client is under NDA: never name it on the site.** Waggle is the
-public-facing rebuild; describe it as a clean-room implementation, not an
-"anonymized version of client work."
-
-A previous draft of this file said *"lead with research."* That was wrong for
-this audience. If you see that earlier framing in copy, revise it out.
-
-Full role background and reasoning: `memory/user_role.md`.
+  sustainability / ESG / environmental applications.
+- Waggle is a clean-room implementation. Never describe it as an
+  "anonymized version of client work," and never name clients.
+- Lead with dev, not research. If earlier research-first framing shows up in
+  copy, revise it out.
 
 ---
 
@@ -96,7 +81,8 @@ Full role background and reasoning: `memory/user_role.md`.
 
 - **mystmd**: content engine
 - **book-theme**: base, with `theme/overrides.css` (≤300 lines, custom CSS only)
-- **Mermaid**: diagrams, pre-rendered to PNG/SVG; sources kept alongside renders
+- **Mermaid**: diagrams render live from `:::{mermaid}` blocks in the page
+  source; PNG renders under `static/diagrams/` back the "View fullscreen" links
 - Static HTML output → `_build/html/`
 - Tests: Python venv at `.venv/`; deps in `tests/requirements.txt`
 
@@ -104,10 +90,10 @@ Full role background and reasoning: `memory/user_role.md`.
 
 ```shell
 # Live preview at http://localhost:3000
-NODE_OPTIONS="--no-deprecation" npx -y mystmd@latest start
+NODE_OPTIONS="--no-deprecation" npx -y mystmd@1.12.0 start
 
 # Static build
-npx -y mystmd@latest build --html
+npx -y mystmd@1.12.0 build --html
 
 # Tests (preview server must be running)
 .venv/bin/python tests/check_links.py        # static link/anchor crawler
@@ -129,14 +115,14 @@ actionable in this repo.
 ├── projects/
 │   └── waggle/waggle.md         single-page case study with embedded diagrams
 ├── theme/overrides.css
-├── static/                     portrait placeholder; future favicon, OG card
-└── tests/                      check_links.py, check_ui.py, conftest.py,
-                                SUBAGENT_SWEEP.md, README.md
+├── static/                     portraits, hero image; diagrams/waggle/ PNG renders
+├── tests/                      check_links.py, check_ui.py, conftest.py,
+│                               SUBAGENT_SWEEP.md, README.md
+└── .github/workflows/deploy.yml  build + deploy to GitHub Pages on push to main
 ```
 
-Local-only working dirs (gitignored, exist on your machine but not in the repo):
-- `notes/`: `PORTFOLIO_PLAN.{md,pdf}`, `PORTFOLIO_PLAN_ARCHITECTURE.{mmd,png}`, `.pdf-header.tex`
-- `screenshots/`: landing/project iteration snapshots
+Gitignored, never committed: `_build/`, `.venv/`, `screenshots/`, and any
+local `notes/`, `.claude/`, or `.mcp.json`.
 
 ## Routing quirk
 
@@ -177,39 +163,47 @@ running preview server.
 
 ## Deliberately not in this file
 
-- Detailed voice patterns, verbatim quotes, full role/career background: those
-  live in `memory/` and load automatically.
-- Long-form planning, alternatives considered, decision rationale:
-  `notes/PORTFOLIO_PLAN.md` (local only, gitignored).
-- Deploy, CI, domain, GitHub repo creation: all open. Don't auto-wire any of
-  these without explicit go-ahead.
+- Detailed voice profile, role background, planning notes, and decision
+  rationale: kept in the maintainer's local workspace, not in this repo.
+- Custom domain: still open. Don't wire one up without explicit go-ahead.
 
-<!-- trace-mcp:claude-code -->
+## Deploy (read before any push)
 
-## TRACE Audit Protocol
+`.github/workflows/deploy.yml` builds the site and deploys it to GitHub Pages
+(`https://thru-echoes.github.io`) on **every push to `main`**. GitHub Pages has
+no private pages: anything merged to `main` is public, and a page left out of
+`nav` is still reachable by URL. Work on a feature branch and open a PR; never
+push to `main` directly. CI runs `npx -y mystmd@latest build --html`, so that
+command must pass locally before a PR.
 
-This project uses [TRACE](https://github.com/Thru-Echoes/TRACE) for transparent
-documentation of AI-human collaboration. The TRACE MCP server is configured in
-`.mcp.json` and enforced via `.claude/hooks/`.
+## TRACE evidence page
 
-**Absolute rule**: Never fabricate, falsify, or retroactively alter TRACE
-data. A sparse honest record beats a dense fabricated one.
+`/trace-evidence` (`projects/trace/trace-evidence.md`) shows aggregate counts
+from the maintainer's local TRACE store. Nothing on that page is hand-typed:
 
-**Session lifecycle**
+- `tools/trace_evidence/` reads the store **read-only** and writes the 8 files
+  listed in `PUBLIC_FILES`: `static/evidence/evidence.json`, four light/dark
+  SVG charts, and three `projects/trace/_evidence_*.md` fragments that the
+  page includes. Regenerate them all at once; never edit them by hand.
+- The allowlist (registry key -> public slug and display name) and every
+  exclusion diagnostic are private inputs/outputs kept outside the repo, so
+  unapproved project names never appear in committed code.
+- Regenerate (local only):
 
-- **Start** a TRACE session at the beginning of any multi-step workflow.
-- **End** with a summary when the workflow is complete. Review the
-  Attribution Audit returned by `trace_end_session` before closing.
+  ```shell
+  .venv/bin/python -m tools.trace_evidence --store ~/.trace \
+      --release-map <private>/release-map.json --private-dir <private>
+  EVIDENCE_RELEASE=1 .venv/bin/pytest tools/trace_evidence/tests -q
+  ```
 
-**What to log**
+- CI (`.github/workflows/ci.yml`) runs the store-independent tests: committed
+  outputs must equal a re-render of the committed `evidence.json`.
+- Test fixtures use made-up project names only.
 
-- **Decisions** (propose BEFORE acting, resolve when the human responds).
-- **Corrections** when the human catches an AI mistake.
-- **Contributions**: one per artifact, with `direction` (who had the idea)
-  and `execution` (who did the work).
-- Domain tool calls (not file reads, greps, or TRACE's own calls).
+## TRACE
 
-Full protocol, including attribution rules and examples, lives at the
-[TRACE specification](https://github.com/Thru-Echoes/TRACE/blob/main/docs/specification.md).
-
-<!-- /trace-mcp:claude-code -->
+Work on this site is logged with [TRACE](https://github.com/Thru-Echoes/TRACE)
+(decisions, contributions, and corrections in AI-assisted development). The
+TRACE MCP config and hooks live in the maintainer's local workspace, outside
+this repo: `.mcp.json` holds an absolute local path, and `.claude/` is
+machine-local. `.gitignore` keeps both out of the repo if either appears here.

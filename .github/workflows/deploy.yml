@@ -30,7 +30,7 @@ jobs:
         # (`thru-echoes.github.io`) so the site serves at the bare URL.
         # If you later put it back under a path (project-pages or custom
         # domain with subdirectory), set BASE_URL: /<path> here.
-        run: npx -y mystmd@latest build --html
+        run: npx -y mystmd@1.12.0 build --html
 
       - uses: actions/upload-pages-artifact@v3
         with:

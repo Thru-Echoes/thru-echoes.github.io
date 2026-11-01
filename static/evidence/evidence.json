@@ -1,0 +1,607 @@
+{
+  "schema_version": 2,
+  "as_of": "2026-11-01T00:24:48Z",
+  "coverage": {
+    "cutoff": "2026-10-31T00:00:00Z",
+    "sessions": 267,
+    "max_created": "2026-10-29",
+    "format_versions": {
+      "0.3.0": 36,
+      "0.4.1": 76,
+      "0.5.0": 76,
+      "0.5.1": 79
+    },
+    "sessions_resolved_by_alias": 128
+  },
+  "projects": [
+    {
+      "key": "trace",
+      "name": "TRACE",
+      "url": "https://github.com/Thru-Echoes/TRACE",
+      "sessions": 137,
+      "open_sessions": 10,
+      "first": "2026-03-18",
+      "last": "2026-10-14",
+      "events_by_type": {
+        "annotation": 214,
+        "contribution": 266,
+        "decision": 172,
+        "state_change": 11,
+        "tool_call": 32
+      },
+      "decisions": 172,
+      "decisions_by_disposition": {
+        "accepted": 104,
+        "proposed": 49,
+        "rejected": 4,
+        "revised": 15
+      },
+      "proposed_by": {
+        "ai": 138,
+        "human": 34
+      },
+      "resolved_by": {
+        "ai": 5,
+        "human": 118,
+        "not_recorded": 49
+      },
+      "rejected_or_revised": 19,
+      "agent_proposals": 138,
+      "agent_proposals_rejected_or_revised": 17,
+      "contributions": 266,
+      "contributions_by_pair": {
+        "ai→ai": 24,
+        "collaborative→ai": 51,
+        "collaborative→human": 3,
+        "human→ai": 183,
+        "human→collaborative": 3,
+        "human→human": 2
+      },
+      "corrections": 31,
+      "discoveries": 85
+    },
+    {
+      "key": "proofpress",
+      "name": "proofpress",
+      "url": null,
+      "sessions": 5,
+      "open_sessions": 0,
+      "first": "2026-09-30",
+      "last": "2026-10-15",
+      "events_by_type": {
+        "annotation": 11,
+        "contribution": 11,
+        "decision": 6,
+        "state_change": 1,
+        "tool_call": 2
+      },
+      "decisions": 6,
+      "decisions_by_disposition": {
+        "accepted": 2,
+        "proposed": 3,
+        "revised": 1
+      },
+      "proposed_by": {
+        "ai": 5,
+        "human": 1
+      },
+      "resolved_by": {
+        "human": 3,
+        "not_recorded": 3
+      },
+      "rejected_or_revised": 1,
+      "agent_proposals": 5,
+      "agent_proposals_rejected_or_revised": 1,
+      "contributions": 11,
+      "contributions_by_pair": {
+        "ai→ai": 1,
+        "human→ai": 10
+      },
+      "corrections": 1,
+      "discoveries": 5
+    },
+    {
+      "key": "private-research",
+      "name": "Private research repository",
+      "url": null,
+      "sessions": 45,
+      "open_sessions": 4,
+      "first": "2026-09-23",
+      "last": "2026-10-29",
+      "events_by_type": {
+        "annotation": 179,
+        "contribution": 136,
+        "decision": 164,
+        "state_change": 5,
+        "tool_call": 13
+      },
+      "decisions": 164,
+      "decisions_by_disposition": {
+        "accepted": 113,
+        "proposed": 37,
+        "rejected": 2,
+        "revised": 12
+      },
+      "proposed_by": {
+        "ai": 118,
+        "human": 46
+      },
+      "resolved_by": {
+        "human": 127,
+        "not_recorded": 37
+      },
+      "rejected_or_revised": 14,
+      "agent_proposals": 118,
+      "agent_proposals_rejected_or_revised": 10,
+      "contributions": 136,
+      "contributions_by_pair": {
+        "ai→ai": 11,
+        "collaborative→ai": 52,
+        "human→ai": 72,
+        "human→collaborative": 1
+      },
+      "corrections": 18,
+      "discoveries": 91
+    },
+    {
+      "key": "coeqwal",
+      "name": "COEQWAL (contract client work)",
+      "url": null,
+      "sessions": 56,
+      "open_sessions": 2,
+      "first": "2026-06-05",
+      "last": "2026-10-29",
+      "events_by_type": {
+        "annotation": 104,
+        "contribution": 125,
+        "decision": 54,
+        "state_change": 4,
+        "tool_call": 1
+      },
+      "decisions": 54,
+      "decisions_by_disposition": {
+        "accepted": 46,
+        "proposed": 5,
+        "revised": 3
+      },
+      "proposed_by": {
+        "ai": 46,
+        "human": 8
+      },
+      "resolved_by": {
+        "human": 49,
+        "not_recorded": 5
+      },
+      "rejected_or_revised": 3,
+      "agent_proposals": 46,
+      "agent_proposals_rejected_or_revised": 3,
+      "contributions": 125,
+      "contributions_by_pair": {
+        "ai→ai": 3,
+        "collaborative→ai": 24,
+        "human→ai": 98
+      },
+      "corrections": 13,
+      "discoveries": 53
+    },
+    {
+      "key": "rsi-exam",
+      "name": "RSI-Exam provenance study",
+      "url": null,
+      "sessions": 24,
+      "open_sessions": 2,
+      "first": "2026-09-03",
+      "last": "2026-09-10",
+      "events_by_type": {
+        "annotation": 65,
+        "contribution": 46,
+        "decision": 34,
+        "state_change": 2
+      },
+      "decisions": 34,
+      "decisions_by_disposition": {
+        "accepted": 18,
+        "proposed": 15,
+        "rejected": 1
+      },
+      "proposed_by": {
+        "ai": 28,
+        "human": 6
+      },
+      "resolved_by": {
+        "human": 19,
+        "not_recorded": 15
+      },
+      "rejected_or_revised": 1,
+      "agent_proposals": 28,
+      "agent_proposals_rejected_or_revised": 1,
+      "contributions": 46,
+      "contributions_by_pair": {
+        "ai→ai": 1,
+        "collaborative→ai": 5,
+        "human→ai": 40
+      },
+      "corrections": 5,
+      "discoveries": 49
+    }
+  ],
+  "totals": {
+    "key": "all",
+    "name": "All projects",
+    "url": null,
+    "sessions": 267,
+    "open_sessions": 18,
+    "first": "2026-03-18",
+    "last": "2026-10-29",
+    "events_by_type": {
+      "annotation": 573,
+      "contribution": 584,
+      "decision": 430,
+      "state_change": 23,
+      "tool_call": 48
+    },
+    "decisions": 430,
+    "decisions_by_disposition": {
+      "accepted": 283,
+      "proposed": 109,
+      "rejected": 7,
+      "revised": 31
+    },
+    "proposed_by": {
+      "ai": 335,
+      "human": 95
+    },
+    "resolved_by": {
+      "ai": 5,
+      "human": 316,
+      "not_recorded": 109
+    },
+    "rejected_or_revised": 38,
+    "agent_proposals": 335,
+    "agent_proposals_rejected_or_revised": 32,
+    "contributions": 584,
+    "contributions_by_pair": {
+      "ai→ai": 40,
+      "collaborative→ai": 132,
+      "collaborative→human": 3,
+      "human→ai": 403,
+      "human→collaborative": 4,
+      "human→human": 2
+    },
+    "corrections": 68,
+    "discoveries": 283
+  },
+  "weekly": [
+    {
+      "week": "2026-W12",
+      "counts": {
+        "trace": 4,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W13",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W14",
+      "counts": {
+        "trace": 4,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W15",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W16",
+      "counts": {
+        "trace": 9,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W17",
+      "counts": {
+        "trace": 7,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W18",
+      "counts": {
+        "trace": 9,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W19",
+      "counts": {
+        "trace": 1,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W20",
+      "counts": {
+        "trace": 3,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W21",
+      "counts": {
+        "trace": 4,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W22",
+      "counts": {
+        "trace": 2,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W23",
+      "counts": {
+        "trace": 3,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 1,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W24",
+      "counts": {
+        "trace": 9,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 1,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W25",
+      "counts": {
+        "trace": 9,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 2,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W26",
+      "counts": {
+        "trace": 3,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W27",
+      "counts": {
+        "trace": 3,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 10,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W28",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 6,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W29",
+      "counts": {
+        "trace": 2,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 5,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W30",
+      "counts": {
+        "trace": 12,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 8,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W31",
+      "counts": {
+        "trace": 10,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 2,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W32",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W33",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W34",
+      "counts": {
+        "trace": 11,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W35",
+      "counts": {
+        "trace": 8,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 6,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W36",
+      "counts": {
+        "trace": 12,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 8,
+        "rsi-exam": 13
+      }
+    },
+    {
+      "week": "2026-W37",
+      "counts": {
+        "trace": 1,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 1,
+        "rsi-exam": 11
+      }
+    },
+    {
+      "week": "2026-W38",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 0,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W39",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 11,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W40",
+      "counts": {
+        "trace": 0,
+        "proofpress": 1,
+        "private-research": 6,
+        "coeqwal": 1,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W41",
+      "counts": {
+        "trace": 4,
+        "proofpress": 1,
+        "private-research": 5,
+        "coeqwal": 2,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W42",
+      "counts": {
+        "trace": 7,
+        "proofpress": 3,
+        "private-research": 8,
+        "coeqwal": 2,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W43",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 8,
+        "coeqwal": 0,
+        "rsi-exam": 0
+      }
+    },
+    {
+      "week": "2026-W44",
+      "counts": {
+        "trace": 0,
+        "proofpress": 0,
+        "private-research": 7,
+        "coeqwal": 1,
+        "rsi-exam": 0
+      }
+    }
+  ],
+  "excerpts": []
+}

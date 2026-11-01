@@ -1,0 +1,4 @@
+- **Snapshot.** Generated 2026-11-01 00:24 UTC. A session whose latest recorded timestamp is on or after 2026-10-31 (UTC) may still be in progress and is left for the next snapshot. A later snapshot can restate earlier weeks.
+- **Coverage.** 267 sessions across TRACE format versions 0.3.0 (36), 0.4.1 (76), 0.5.0 (76), 0.5.1 (79). 128 sessions lack a canonical project key and were matched to their project through the TRACE alias registry.
+- **Status.** 18 counted sessions are not marked completed; their events are counted as recorded.
+- **Resolution.** 109 of 430 decision records still have the stored disposition proposed, and 109 have no recorded resolver. They are counted, not dropped.

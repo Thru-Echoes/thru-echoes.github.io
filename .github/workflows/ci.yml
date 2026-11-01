@@ -1,0 +1,41 @@
+name: CI
+
+# Store-independent checks for every pull request. The TRACE evidence data is
+# generated locally (the TRACE store never leaves the maintainer's machine);
+# CI proves the committed outputs are consistent and exactly what the
+# committed evidence.json renders to, then builds the site the same way the
+# deploy workflow does.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install evidence pipeline deps
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -q -r tools/trace_evidence/requirements.txt pytest pyright types-PyYAML
+
+      - name: Type check
+        run: .venv/bin/pyright
+
+      - name: Evidence pipeline tests
+        run: .venv/bin/pytest tools/trace_evidence/tests -q -p no:cacheprovider
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build site
+        run: npx -y mystmd@1.12.0 build --html
