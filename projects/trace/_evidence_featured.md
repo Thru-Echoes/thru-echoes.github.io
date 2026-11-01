@@ -1,3 +1,6 @@
+**One decision chain from my TRACE records.** Boxes are records and arrows
+are the links stored in them. Select a box to read the record.
+
 :::{anywidget} /projects/trace/chains-graph.mjs
 :css: /projects/trace/chains-graph.css
 :class: trace-featured

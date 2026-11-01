@@ -174,7 +174,8 @@ def get_excerpts_md(report: EvidenceReport) -> str:
             out.append("\n")
             if n.resolution:
                 who = _ACTOR[n.resolved_by or "not_recorded"].capitalize()
-                out.append(f"> **{_esc(n.id)}, {who} {n.disposition}**\n>\n> {_esc(n.resolution)}\n\n")
+                body = "\n>\n".join(f"> {_esc(ln)}" for ln in n.resolution.splitlines() if ln.strip())
+                out.append(f"> **{_esc(n.id)}, {who} {n.disposition}**\n>\n{body}\n\n")
         if x.edges:
             links = "; ".join(f"{_esc(e.source)} {_REL[e.relation]} {_esc(e.target)}" for e in x.edges)
             out.append(f"Links stored in these records: {links}.\n\n")
@@ -201,16 +202,21 @@ def _chain_model(report: EvidenceReport, chains: list[Excerpt]) -> list[dict[str
 
 
 def get_featured_md(report: EvidenceReport) -> str:
-    """The featured chain for the landing page, compact, with a link to all chains; '' if none."""
+    """The featured chain for the landing page: caption, compact graph, and a link to all chains.
+
+    Returns '' when no chain is featured, so the landing page then shows nothing.
+    """
     featured = [x for x in report.excerpts if x.featured]
     if not featured:
         return ""
     model = {"compact": True, "projects": [], "chains": _chain_model(report, featured)}
     n = len(report.excerpts)
-    return (
-        _graph_block(model, "trace-featured")
-        + f"\n[See all {n} decision chains →](/trace-evidence#chain={featured[0].slug})\n"
+    caption = (
+        "**One decision chain from my TRACE records.** Boxes are records and arrows\n"
+        "are the links stored in them. Select a box to read the record.\n\n"
     )
+    more = f"See all {n} decision chains →" if n > 1 else "See the decision chain →"
+    return caption + _graph_block(model, "trace-featured") + f"\n[{more}](/trace-evidence#chain={featured[0].slug})\n"
 
 
 def get_graph_md(report: EvidenceReport) -> str:

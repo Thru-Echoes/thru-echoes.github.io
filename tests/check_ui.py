@@ -524,5 +524,7 @@ class TestDecisionsPage:
         assert w.locator(".tcg-card").count() == 0 and w.get_by_role("button", name="Next chain").count() == 0
         link = page.locator('.trace-featured-wrap a[href^="/trace-evidence#chain="]')
         expect(link).to_have_count(1)
-        assert page.evaluate("location.hash") == "", "the landing widget must not touch the URL"
+        w.locator(".tcg-node").first.click()
+        expect(w.locator(".tcg-node").first).to_have_attribute("aria-pressed", "true")
+        assert page.evaluate("location.hash") == "", "selecting a record on the landing page must not change the URL"
 

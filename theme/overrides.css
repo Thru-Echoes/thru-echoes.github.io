@@ -588,3 +588,4 @@ html.dark {
   font-size: 0.95rem;
 }
 .trace-featured-wrap > p:first-child { margin-top: 0; }
+.trace-featured-wrap:empty { display: none; }

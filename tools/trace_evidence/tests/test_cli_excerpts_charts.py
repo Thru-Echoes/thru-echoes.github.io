@@ -317,6 +317,17 @@ def test_human_ruling_is_published_only_on_human_rejections_and_revisions(chain_
     assert "> **d1, Human rejected**\n>\n> No, because Y." in md
 
 
+def test_ruling_requires_a_human_resolver_and_allows_revisions(make_store, release_map, tmp_path, capsys):
+    evs = [_dec("r1", "human", "rejected", "ai"), _dec("v1", "ai", "revised", "human")]
+    st = make_store([session_dict("s1", "acme", events=evs)])
+    rc, _ = _chain(st, release_map, tmp_path, key_event_id="r1", nodes=[{"event_id": "r1", "headline": "h", "resolution": "zz"}])
+    assert rc == 2 and "resolution-not-allowed" in capsys.readouterr().err  # rejected, but by an AI
+    rc, x = _chain(st, release_map, tmp_path, key_event_id="v1", nodes=[{"event_id": "v1", "headline": "h", "resolution": "Keep it, but Z.\n\nSecond paragraph."}])
+    assert rc == 0 and x is not None and x.nodes[0].resolution
+    md = (tmp_path / "site/projects/trace/_evidence_excerpts.md").read_text()
+    assert "> **v1, Human revised**\n>\n> Keep it, but Z.\n>\n> Second paragraph.\n" in md  # stays inside the quote
+
+
 @pytest.mark.parametrize("eid", ["d2", "a1", "c1"])  # accepted decision, correction, contribution
 def test_ruling_text_on_other_records_is_rejected(chain_store, release_map, tmp_path, capsys, eid):
     rc, _ = _chain(chain_store, release_map, tmp_path, key_event_id=eid, nodes=[{"event_id": eid, "headline": "h", "resolution": "zz"}])
@@ -330,8 +341,10 @@ def test_featured_chain_renders_compact_block_with_link(chain_store, release_map
     assert rc == 0
     text = (tmp_path / "site/projects/trace/_evidence_featured.md").read_text()
     lines = text.splitlines()
-    assert lines[2] == ":class: trace-featured" and _json.loads(lines[3])["compact"] is True
-    assert "[See all 1 decision chains →](/trace-evidence#chain=t)" in text
+    at = lines.index(":::{anywidget} /projects/trace/chains-graph.mjs")
+    assert lines[at + 2] == ":class: trace-featured" and _json.loads(lines[at + 3])["compact"] is True
+    assert text.startswith("**One decision chain from my TRACE records.**")
+    assert "[See the decision chain →](/trace-evidence#chain=t)" in text
 
 
 def test_featured_must_be_boolean_and_unique(chain_store, release_map, tmp_path, capsys):

@@ -118,9 +118,16 @@ def test_landing_buttons_name_their_destination():
     assert "See the evidence" not in text and "/trace-decisions" not in text
 
 
-def test_at_most_one_featured_chain_and_its_rulings_are_human():
+def test_landing_featured_chain_is_present_exactly_once():
+    # index.md includes the featured fragment; with no featured chain the
+    # landing page would show an empty slot under the TRACE callout.
     rep = _report()
-    assert sum(x.featured for x in rep.excerpts) <= 1
+    assert sum(x.featured for x in rep.excerpts) == 1
+    assert (SITE / "projects/trace/_evidence_featured.md").read_text().strip()
+
+
+def test_rulings_are_human():
+    rep = _report()
     for x in rep.excerpts:
         for n in x.nodes:
             if n.resolution:

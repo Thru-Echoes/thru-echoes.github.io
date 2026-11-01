@@ -63,9 +63,6 @@ operational data. **Live app and architecture diagrams.**
 :::{div}
 :class: trace-featured-wrap
 
-**One decision chain from my TRACE records.** Boxes are records and arrows
-are the links stored in them. Select a box to read the record.
-
 ```{include} projects/trace/_evidence_featured.md
 ```
 
