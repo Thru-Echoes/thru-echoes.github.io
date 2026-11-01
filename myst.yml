@@ -28,6 +28,7 @@ project:
   toc:
     - file: index.md
     - file: projects/trace/trace-evidence.md
+    - file: projects/trace/trace-decisions.md
     - file: projects/waggle/waggle.md
 
 site:
@@ -47,6 +48,8 @@ site:
   nav:
     - title: TRACE evidence
       url: /trace-evidence
+    - title: Decision chains
+      url: /trace-decisions
     - title: Waggle
       url: /waggle
   actions:

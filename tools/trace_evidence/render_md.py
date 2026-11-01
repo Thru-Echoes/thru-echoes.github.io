@@ -1,6 +1,6 @@
 """Render the generated MyST include fragments from an EvidenceReport.
 
-The page source never types a number; it includes these three fragments.
+The page sources never type a number; they include these fragments.
 Copy rules enforced here: no em or en dashes, no double hyphens.
 
 Exports:
@@ -8,18 +8,21 @@ Exports:
     get_table_md(report) -> str          (_evidence_table.md)
     get_methods_md(report) -> str        (_evidence_methods.md)
     get_contrib_table_md(report) -> str  (_evidence_contributions.md)
-    get_excerpts_md(report) -> str       (_evidence_excerpts.md)
+    get_excerpts_md(report) -> str       (_evidence_excerpts.md, text version of the chains)
+    get_graph_md(report) -> str          (_evidence_graph.md, interactive chain graph)
+    get_node_label(node) -> str
 
 No side effects.
 """
 
 from __future__ import annotations
 
+import json
 import re
 from datetime import date, datetime
 
 from .charts import CONTRIB_CATEGORIES, get_contrib_category
-from .models import EvidenceReport, ProjectStats
+from .models import ChainNode, EvidenceReport, Excerpt, ProjectStats
 
 _MD_SPECIAL = re.compile(r"([\\`*_{}\[\]()#+!|<>])")
 
@@ -128,20 +131,67 @@ def get_contrib_table_md(report: EvidenceReport) -> str:
     return head + "".join(row(p) for p in report.projects) + row(report.totals, bold=True)
 
 
+_ACTOR = {"ai": "agent", "human": "human", "system": "system", "not_recorded": "unrecorded actor"}
+_PARTY = {"ai": "AI", "human": "human", "collaborative": "shared", "unknown": "unrecorded"}
+_REL = {"revises": "revises", "corrects": "corrects", "builds_on": "builds on"}
+
+
+def get_node_label(n: ChainNode) -> str:
+    """Short role label for one chain node, from store metadata only. Pure."""
+    if n.kind == "decision":
+        who = _ACTOR[n.proposed_by or "not_recorded"]
+        if n.disposition in ("accepted", "rejected", "revised"):
+            return f"Decision: {who} proposal, {n.disposition} by {_ACTOR[n.resolved_by or 'not_recorded']}"
+        return f"Decision: {who} proposal, not yet resolved"
+    if n.kind == "contribution":
+        return f"Contribution: {_PARTY[n.direction or 'unknown']} idea, {_PARTY[n.execution or 'unknown']} built"
+    return {"correction": "Correction", "annotation": "Annotation", "external": "External reference"}[n.kind]
+
+
+def _when(x: Excerpt) -> str:
+    return datetime.strptime(x.month, "%Y-%m").strftime("%B %Y") if x.month != "unknown" else "date not recorded"
+
+
 def get_excerpts_md(report: EvidenceReport) -> str:
-    """Approved decision-chain excerpts, each as a heading, a source line, and a block quote."""
+    """Text version of every chain: heading, source line, one quote per record, then its links."""
     if not report.excerpts:
-        return "No excerpts are published in this snapshot.\n"
+        return "No decision chains are published in this snapshot.\n"
     out: list[str] = []
     for x in report.excerpts:
-        when = datetime.strptime(x.month, "%Y-%m").strftime("%B %Y") if x.month != "unknown" else "date not recorded"
-        out.append(f"### {_esc(x.title)}\n\n*{_esc(x.project_name)}, {when}*\n\n")
-        parts = [ln for ln in x.text.splitlines() if ln.strip()]
-        for i, line in enumerate(parts):
-            label, sep, rest = line.partition(": ")
-            body = f"**{_esc(label)}:** {_esc(rest)}" if sep and len(label) <= 60 else _esc(line)
-            out.append(f"> {body}\n")
-            if i < len(parts) - 1:
-                out.append(">\n")
-        out.append("\n")
+        out.append(f"### {_esc(x.title)}\n\n*{_esc(x.project_name)}, {_when(x)}*\n\n")
+        for n in x.nodes:
+            out.append(f"> **{_esc(n.id)}, {_esc(get_node_label(n))}**\n>\n")
+            body = n.url and f"[{_esc(n.headline)}]({n.url})" or None
+            parts = [body] if body else [ln for ln in (n.text or n.headline).splitlines() if ln.strip()]
+            for i, line in enumerate(parts):
+                label, sep, rest = line.partition(": ")
+                labelled = bool(n.text) and sep and len(label) <= 60
+                text = line if body else (f"**{_esc(label)}:** {_esc(rest)}" if labelled else _esc(line))
+                out.append(f"> {text}\n")
+                if i < len(parts) - 1:
+                    out.append(">\n")
+            out.append("\n")
+        if x.edges:
+            links = "; ".join(f"{_esc(e.source)} {_REL[e.relation]} {_esc(e.target)}" for e in x.edges)
+            out.append(f"Links stored in these records: {links}.\n\n")
     return "".join(out)
+
+
+def get_graph_md(report: EvidenceReport) -> str:
+    """The interactive chain graph as a MyST anywidget block whose body is the chain data."""
+    order = {p.key: i for i, p in enumerate(report.projects)}
+    model = {
+        "projects": [{"slug": p.key, "name": p.name, "color": i} for i, p in enumerate(report.projects)],
+        "chains": [
+            {
+                "slug": x.slug, "title": x.title, "project": x.project, "project_name": x.project_name,
+                "color": order.get(x.project, 0), "when": _when(x), "key": x.key_event_id,
+                "unshown": x.unshown_links,
+                "nodes": [{**n.model_dump(exclude_none=True), "label": get_node_label(n)} for n in x.nodes],
+                "edges": [e.model_dump() for e in x.edges],
+            }
+            for x in report.excerpts
+        ],
+    }  # fmt: skip
+    body = json.dumps(model, ensure_ascii=True, separators=(",", ":"))
+    return f":::{{anywidget}} ./chains-graph.mjs\n:css: ./chains-graph.css\n:class: col-page-right\n{body}\n:::\n"

@@ -44,8 +44,11 @@ if not all(p.exists() for p in NEEDED):
 
 COMMITTED = EvidenceReport.model_validate_json((SITE / "static/evidence/evidence.json").read_text())
 MANIFEST = json.loads((PRIVATE / "evidence-manifest.json").read_text())
+# Released project keys, plus "coeqwal-website": the public GitHub repository
+# of a released project, which an external reference on the chains page names.
 PUBLIC_OK_TOKENS = {
     "trace", "trace-mcp", "proofpress", "proofpress-experiments", "coeqwal", "rsi-exam-provenance", "waggle", "echoes-portfolio",
+    "coeqwal-website",
 }  # fmt: skip
 GENERIC_WORDS = {"meeting", "personal", "travel", "tax", "conf"}
 

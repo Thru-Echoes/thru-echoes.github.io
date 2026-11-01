@@ -38,6 +38,7 @@ BASE = "http://localhost:3000"
 PAGES: list[str] = [
     "/",
     "/trace-evidence",
+    "/trace-decisions",
     "/waggle",
 ]
 

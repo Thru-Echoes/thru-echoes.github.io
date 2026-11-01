@@ -113,6 +113,7 @@ actionable in this repo.
 ├── myst.yml                    project config + ToC
 ├── index.md                    single-page site (hero, selected work, skills)
 ├── projects/
+│   ├── trace/                  TRACE evidence overview + decision chains pages
 │   └── waggle/waggle.md         single-page case study with embedded diagrams
 ├── theme/overrides.css
 ├── static/                     portraits, hero image; diagrams/waggle/ PNG renders
@@ -176,15 +177,30 @@ no private pages: anything merged to `main` is public, and a page left out of
 push to `main` directly. CI runs `npx -y mystmd@latest build --html`, so that
 command must pass locally before a PR.
 
-## TRACE evidence page
+## TRACE evidence pages
 
-`/trace-evidence` (`projects/trace/trace-evidence.md`) shows aggregate counts
-from the maintainer's local TRACE store. Nothing on that page is hand-typed:
+Two pages are generated from the maintainer's local TRACE store. Nothing on
+either page is hand-typed:
 
-- `tools/trace_evidence/` reads the store **read-only** and writes the 8 files
-  listed in `PUBLIC_FILES`: `static/evidence/evidence.json`, four light/dark
-  SVG charts, and three `projects/trace/_evidence_*.md` fragments that the
-  page includes. Regenerate them all at once; never edit them by hand.
+- `/trace-evidence` (`projects/trace/trace-evidence.md`): the overview, with
+  aggregate counts, the summary table, two light/dark SVG charts, and methods.
+- `/trace-decisions` (`projects/trace/trace-decisions.md`): approved decision
+  chains drawn as an interactive graph by `projects/trace/chains-graph.mjs`
+  (a MyST `anywidget`, no dependencies, styled by `chains-graph.css` and the
+  `--tcg-*` tokens in `theme/overrides.css`). The module holds no data; the
+  generated `_evidence_graph.md` passes the chains in as the widget body. A
+  text version of every chain sits in a dropdown below it.
+
+`tools/trace_evidence/` reads the store **read-only** and writes the files in
+`PUBLIC_FILES`: `static/evidence/evidence.json`, four SVG charts, and the
+`projects/trace/_evidence_*.md` fragments the pages include. Regenerate them
+all at once; never edit them by hand.
+
+- Chain approvals (a private file) supply only text: a headline per record
+  and optional longer quotes. Node metadata and every graph edge come from
+  the records' own link fields (`revises_event_id`, `corrects_event_ids`,
+  `related_decision_ids`); links to records that are not shown are counted,
+  not drawn.
 - The allowlist (registry key -> public slug and display name) and every
   exclusion diagnostic are private inputs/outputs kept outside the repo, so
   unapproved project names never appear in committed code.
@@ -192,7 +208,9 @@ from the maintainer's local TRACE store. Nothing on that page is hand-typed:
 
   ```shell
   .venv/bin/python -m tools.trace_evidence --store ~/.trace \
-      --release-map <private>/release-map.json --private-dir <private>
+      --release-map <private>/release-map.json --private-dir <private> \
+      --excerpts <private>/approved_excerpts.yaml
+  npx -y mystmd@1.12.0 build --html
   EVIDENCE_RELEASE=1 .venv/bin/pytest tools/trace_evidence/tests -q
   ```
 

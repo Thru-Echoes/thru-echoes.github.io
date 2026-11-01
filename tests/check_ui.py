@@ -388,3 +388,76 @@ class TestEvidencePage:
         page.goto(base_url + LANDING)
         set_desktop(page)
         assert page.locator('a[href="/trace-evidence"]').count() >= 2
+
+
+# ─────────────────────────────────────────────────────────────────────
+# TRACE decision chains page: the interactive chain graph (shadow DOM)
+# ─────────────────────────────────────────────────────────────────────
+
+DECISIONS = "/trace-decisions"
+
+
+def _widget(page: Page):
+    page.wait_for_selector(".myst-anywidget", state="attached", timeout=10000)
+    page.wait_for_function("() => document.querySelector('.myst-anywidget')?.shadowRoot?.querySelector('.tcg-node')", timeout=10000)
+    return page.locator(".myst-anywidget").first
+
+
+class TestDecisionsPage:
+    def test_graph_renders_every_chain_card_and_nodes(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        n_cards = w.locator(".tcg-card").count()
+        assert n_cards >= 1
+        assert w.locator(".tcg-node").count() >= 1
+        assert w.locator(".tcg-stage").get_attribute("data-mode") == "dag", "desktop should draw the left-to-right graph"
+
+    def test_selecting_a_record_shows_its_quote(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        nodes = w.locator(".tcg-node")
+        target = nodes.nth(nodes.count() - 1)
+        target.click()
+        expect(target).to_have_attribute("aria-pressed", "true")
+        head = target.locator(".tcg-node-head").inner_text()[:20]
+        expect(w.locator(".tcg-quote")).to_contain_text(head.split("...")[0][:15])
+
+    def test_next_and_cards_change_chain_and_hash(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        first = w.locator(".tcg-title h3").inner_text()
+        w.get_by_role("button", name="Next chain").click()
+        expect(w.locator(".tcg-title h3")).not_to_have_text(first)
+        assert page.evaluate("location.hash").startswith("#")
+        w.locator(".tcg-card").first.click()
+        expect(w.locator(".tcg-title h3")).to_have_text(first)
+
+    def test_hash_deep_link_selects_chain(self, page: Page, base_url: str):
+        page.goto(base_url + DECISIONS)
+        set_desktop(page)
+        w = _widget(page)
+        last = w.locator(".tcg-card").last
+        title = last.locator(".tcg-card-title").inner_text()
+        last.click()
+        slug = page.evaluate("location.hash")
+        page.goto(base_url + DECISIONS + slug)
+        page.reload()
+        w = _widget(page)
+        expect(w.locator(".tcg-title h3")).to_have_text(title)
+
+    def test_phone_uses_list_layout_without_page_scroll(self, page: Page, base_url: str):
+        set_mobile(page)
+        page.goto(base_url + DECISIONS)
+        w = _widget(page)
+        assert w.locator(".tcg-stage").get_attribute("data-mode") == "list"
+        sw, iw = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
+        assert sw <= iw, f"page scrolls horizontally: scrollWidth={sw} innerWidth={iw}"
+
+    def test_overview_links_to_decisions(self, page: Page, base_url: str):
+        page.goto(base_url + EVIDENCE)
+        set_desktop(page)
+        assert page.locator('a[href="/trace-decisions"]').count() >= 1
+

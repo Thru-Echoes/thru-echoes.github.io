@@ -15,15 +15,16 @@ Exports:
     Input:  Actor, DecisionRec, ContributionRec, AnnotationRec, EventRecord,
             SessionMeta, SessionRecord, Snapshot
     Vocab:  EventType, Disposition, ActorType, PairKey, EVENT_TYPES,
-            DISPOSITIONS, ACTOR_TYPES, PARTIES, PAIR_KEYS
-    Output: ProjectDisplay, ProjectStats, WeekRow, Coverage, Excerpt,
+            DISPOSITIONS, ACTOR_TYPES, PARTIES, PAIR_KEYS, NodeKind, Relation
+    Output: ProjectDisplay, ProjectStats, WeekRow, Coverage, ChainNode,
+            ChainEdge, Excerpt,
             EvidenceReport, Diagnostics
 """
 
 from __future__ import annotations
 
 from datetime import UTC, date, datetime
-from typing import Literal, get_args
+from typing import Any, Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -43,6 +44,8 @@ EVENT_TYPES: tuple[str, ...] = get_args(EventType)
 DISPOSITIONS: tuple[str, ...] = get_args(Disposition)
 ACTOR_TYPES: tuple[str, ...] = get_args(ActorType)
 PARTIES: tuple[str, ...] = get_args(Party)
+NodeKind = Literal["decision", "correction", "annotation", "contribution", "external"]
+Relation = Literal["revises", "corrects", "builds_on"]
 PAIR_KEYS: tuple[str, ...] = get_args(PairKey)
 
 
@@ -66,15 +69,20 @@ class DecisionRec(_In):
     disposition: str | None = None
     proposed_by: Actor | None = None
     resolved_by: Actor | None = None
+    # Link fields are typed loosely so a malformed link never makes an
+    # otherwise valid session unreadable; excerpts.get_links() normalizes them.
+    revises_event_id: Any = None
 
 
 class ContributionRec(_In):
     direction: str | None = None
     execution: str | None = None
+    related_decision_ids: Any = None
 
 
 class AnnotationRec(_In):
     category: str | None = None
+    corrects_event_ids: Any = None
 
 
 class EventRecord(_In):
@@ -185,21 +193,46 @@ class Coverage(_Out):
     sessions_resolved_by_alias: int = Field(description="Included sessions lacking metadata.project_key.")
 
 
+class ChainNode(_Out):
+    """One record in a published decision chain. Metadata comes from the store; text is approved."""
+
+    id: str = Field(description="Event id in the session, or ext-N for an external reference.")
+    kind: NodeKind
+    proposed_by: ActorType | None = Field(default=None, description="Decisions only.")
+    disposition: Disposition | None = Field(default=None, description="Decisions only.")
+    resolved_by: ActorType | None = Field(default=None, description="Decisions only.")
+    direction: Party | None = Field(default=None, description="Contributions only: who had the idea.")
+    execution: Party | None = Field(default=None, description="Contributions only: who did the work.")
+    headline: str = Field(description="Approved short text shown on the graph node.")
+    text: str | None = Field(default=None, description="Approved longer quote, one labelled part per line.")
+    url: str | None = Field(default=None, description="External references only: an https link.")
+
+
+class ChainEdge(_Out):
+    """A link stored in the source record: `source` revises, corrects, or builds on `target`."""
+
+    source: str
+    target: str
+    relation: Relation
+
+
 class Excerpt(_Out):
-    event_id: str = Field(description="Seed event of the quoted chain.")
-    related_event_ids: list[str] = Field(default_factory=list, description="Other quoted events in the same session.")
+    slug: str = Field(pattern=r"^[a-z0-9-]{1,60}$", description="Stable anchor derived from the title.")
+    key_event_id: str = Field(description="The node a reader sees first.")
     session_id: str
-    project: str = Field(description="Public slug of the project the event belongs to.")
+    project: str = Field(description="Public slug of the project the session belongs to.")
     project_name: str
     month: str = Field(description="Session start, YYYY-MM.")
     title: str
-    text: str = Field(description="Approved text, copied verbatim from the approvals file.")
+    nodes: list[ChainNode] = Field(min_length=1)
+    edges: list[ChainEdge] = Field(description="Derived from the records' own link fields, never hand-entered.")
+    unshown_links: int = Field(ge=0, description="Links stored in shown records whose target is not shown.")
     approved_on: date
     approved_by: str = Field(description="Who approved publication (the owner, or the owner's delegated panel).")
 
 
 class EvidenceReport(_Out):
-    schema_version: Literal[2] = 2
+    schema_version: Literal[3] = 3
     as_of: datetime
     coverage: Coverage
     projects: list[ProjectStats]
