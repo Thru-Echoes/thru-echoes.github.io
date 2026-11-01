@@ -516,6 +516,15 @@ class TestDecisionsPage:
         assert w.locator(".tcg-edge.r-rules").count() >= 1
         assert w.locator(".tcg-elabel.r-rules").first.inner_text() in ("rejects", "amends")
 
+    def test_graph_stays_horizontal_on_tablet_and_small_laptop_widths(self, page: Page, base_url: str):
+        for width in (1024, 768):
+            page.set_viewport_size({"width": width, "height": 900})
+            page.goto(base_url + LANDING)
+            w = _widget(page)
+            assert w.locator(".tcg-stage").get_attribute("data-mode") == "dag", width
+            sw, iw = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
+            assert sw <= iw, f"page scrolls horizontally at {width}px: {sw} > {iw}"
+
     def test_landing_shows_featured_chain_compact(self, page: Page, base_url: str):
         page.goto(base_url + LANDING)
         set_desktop(page)
