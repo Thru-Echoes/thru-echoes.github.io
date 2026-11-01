@@ -43,7 +43,9 @@ if not all(p.exists() for p in NEEDED):
 
 COMMITTED = EvidenceReport.model_validate_json((SITE / "static/evidence/evidence.json").read_text())
 MANIFEST = json.loads((PRIVATE / "evidence-manifest.json").read_text())
-PUBLIC_OK_TOKENS = {"trace", "trace-mcp", "proofpress", "coeqwal", "rsi-exam-provenance", "waggle", "echoes-portfolio"}
+PUBLIC_OK_TOKENS = {
+    "trace", "trace-mcp", "proofpress", "proofpress-experiments", "coeqwal", "rsi-exam-provenance", "waggle", "echoes-portfolio",
+}  # fmt: skip
 GENERIC_WORDS = {"meeting", "personal", "travel", "tax", "conf"}
 
 
