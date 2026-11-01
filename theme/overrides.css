@@ -560,3 +560,21 @@ html.dark .evidence-chart .evidence-chart-light,
 html.dark .evidence-chart img.evidence-chart-light { display: none; }
 html.dark .evidence-chart .evidence-chart-dark,
 html.dark .evidence-chart img.evidence-chart-dark { display: block; }
+
+/* TRACE decision chains graph (projects/trace/chains-graph.mjs). The widget
+ * renders in a shadow root; these custom properties inherit into it. Actor
+ * colors are CVD-checked against both surfaces. */
+:root {
+  --tcg-agent: #2a78d6;
+  --tcg-human: #c2410c;
+  --tcg-shared: #6250d6;
+  --tcg-line: #a8a29e;
+  --tcg-border: #e2dcd3;
+}
+html.dark {
+  --tcg-agent: #3987e5;
+  --tcg-human: #d95926;
+  --tcg-shared: #9085e9;
+  --tcg-line: #78716c;
+  --tcg-border: #3a3632;
+}

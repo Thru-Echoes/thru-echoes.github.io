@@ -11,35 +11,23 @@ description: >-
 ```{include} _evidence_claim.md
 ```
 
-This is a self-logged snapshot of how I use my own tool, not an audit of
-shipped work or evidence of outside adoption.
+[TRACE](https://github.com/Thru-Echoes/TRACE) is the open-source MCP server I
+built to record, during AI-assisted work, who proposed each decision, who
+resolved it, and who had the idea and did the work for each artifact.
+[proofpress](https://github.com/chenmingtang830/proofpress) ingests these
+records; I co-founded Continuara Labs, the company building it.
 
-## What TRACE records
+:::{card} Decision chains →
+:link: /trace-decisions
+Twelve real chains from these records, drawn as linked graphs: an agent's
+proposal and what a human did with it, or a mistake and the correction that
+points back at it.
+:::
 
-[TRACE](https://github.com/Thru-Echoes/TRACE) is an open-source MCP server I
-built for decision provenance in AI-assisted work. While I work with coding
-agents, it writes a structured record of each session: decisions with who
-proposed them, who resolved them, and why; contributions with who had the idea
-and who did the work; and annotations, including corrections. The format is
-defined in the
-[specification](https://github.com/Thru-Echoes/TRACE/blob/main/docs/specification.md).
-
-I build TRACE and I run it on my own work. TRACE records also feed
-[proofpress](https://github.com/chenmingtang830/proofpress), which ingests
-them; I co-founded Continuara Labs, the company building proofpress.
-
-This page is a snapshot, published by hand, of the records from five project
-workspaces: TRACE itself, proofpress, proofpress experiments, COEQWAL (contract
-client work), and the RSI-Exam provenance study.
-
-## Summary
+## By project
 
 ```{include} _evidence_table.md
 ```
-
-**Sessions** counts recorded work sessions; **session starts** gives the first
-and last start date. **Rejected or revised** counts decision records whose
-stored disposition is rejected or revised.
 
 ## Session starts by week
 
@@ -58,15 +46,11 @@ stored disposition is rejected or revised.
 
 :::
 
-A week without session starts does not mean a week without work: one session
-can run for days, and this page covers five workspaces, not every project I
-work on. Weekly counts per project are in [evidence.json](/static/evidence/evidence.json).
+One session can run for days, so a quiet week is not a week without work.
 
 ## Who had the idea, who did the work
 
-Each contribution record names who had the idea (**direction**) and who
-carried it out (**execution**). In most contribution records, the direction is
-human and the execution is AI.
+In most contribution records, the idea is human and the execution is AI.
 
 :::{div}
 :class: evidence-chart
@@ -83,74 +67,28 @@ human and the execution is AI.
 
 :::
 
+:::{dropdown} Table view
 ```{include} _evidence_contributions.md
 ```
+:::
 
-## What one record looks like
-
-The two linked events below are a **synthetic example** with made-up content,
-shown only to illustrate the fields that answer "who proposed, who decided, who
-built." They are not from my records.
-
-```json
-[
-  {
-    "id": "evt_001",
-    "type": "decision",
-    "actor": {"type": "ai", "id": "assistant"},
-    "decision": {
-      "description": "Cache parsed config files in memory",
-      "rationale": "Config is re-read on every request",
-      "proposed_by": {"type": "ai"},
-      "disposition": "revised",
-      "resolved_by": {"type": "human"},
-      "revision_note": "Cache, but invalidate on file change"
-    }
-  },
-  {
-    "id": "evt_002",
-    "type": "contribution",
-    "actor": {"type": "ai", "id": "assistant"},
-    "contribution": {
-      "description": "Config cache with file-change invalidation",
-      "artifact": "app/config_cache.py",
-      "direction": "collaborative",
-      "execution": "ai",
-      "related_decision_ids": ["evt_001"]
-    }
-  }
-]
-```
-
-## Decision chains from the records
-
-These are real chains from the records: an agent's proposal and what a human
-did with it, or a mistake and the correction that points back at it. Quotes are
-verbatim, except that other people's names are replaced with their role and
-dashes are normalized. They were picked for clarity and for spread across the
-five workspaces.
-
-```{include} _evidence_excerpts.md
-```
-
-## Methods and limits
-
+:::{dropdown} Methods and limits
 - **Self-logged.** The agent and I write these records during the work. Each
   entry is attributable (it names who proposed, resolved, or did the work),
   but the records are not independently checked.
-- **Scope.** Five project workspaces. Other projects in my TRACE store and all
-  meeting recordings are excluded and not described here.
-- **Human entries.** Human entries are mine, except in the co-owned and client
-  workspaces, where a few come from collaborators.
+- **Scope.** Five project workspaces: TRACE, proofpress, proofpress
+  experiments, COEQWAL (contract client work), and the RSI-Exam provenance
+  study. Other projects and all meeting recordings are excluded.
+- **Human entries.** Mine, except in the co-owned and client workspaces, where
+  a few come from collaborators.
 - **Counting unit.** Counts are records, not distinct choices: a decision that
-  is revised and then accepted can appear as more than one record. They measure
-  recorded activity, not output, productivity, or quality.
+  is revised and then accepted can appear as more than one record.
+  **Rejected or revised** counts decision records with that stored
+  disposition. Counts measure recorded activity, not output or quality.
 ```{include} _evidence_methods.md
 ```
 
-The aggregates behind this page are published as
+The aggregates are published as
 [evidence.json](/static/evidence/evidence.json). The code that computes them
 reads my local TRACE store read-only and is part of this site's repository.
-For the engineering itself, see TRACE's
-[test suite](https://github.com/Thru-Echoes/TRACE/tree/main/tests) and
-[releases](https://github.com/Thru-Echoes/TRACE/releases).
+:::

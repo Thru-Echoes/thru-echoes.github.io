@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "as_of": "2026-11-01T01:06:21Z",
   "coverage": {
     "cutoff": "2026-10-31T00:00:00Z",
@@ -605,152 +605,731 @@
   ],
   "excerpts": [
     {
-      "event_id": "evt_001",
-      "related_event_ids": [
-        "evt_002"
-      ],
+      "slug": "shouldnt-it-just-be-the-one-liner",
+      "key_event_id": "evt_001",
       "session_id": "trace_20261027_8a8cff",
       "project": "proofpress-experiments",
       "project_name": "proofpress experiments",
       "month": "2026-10",
       "title": "Shouldn't it just be the one-liner?",
-      "text": "Agent proposed: Next 1 from the 2026-10-27 handoff: replace the per-session shutil.copyfile of each report PDF in src/ppx/runcard.py with a clone-or-copy helper: a copy-on-write clone through clonefile (macOS, ctypes) or the FICLONE ioctl (Linux btrfs/XFS), falling back to shutil.copyfile on any OSError; [...]\nRationale: Oliver's words: \"is it really necessary to do what you recommended and i just agreed to? shouldnt it just be super simple and that one liner?\" The ctypes route adds platform code and constants that can be wrong (the spike's first getattrlist constants were) for no gain over cp's built-in fallback; one process per report per session build is negligible.\nHuman accepted: Oliver's mid-turn message directed the simpler form; the AI agreed and built it: clone_or_copy in src/ppx/runcard.py (one cp call, -c on macOS, --reflink=auto elsewhere, check=True) at the two PDF copy sites (a sample's reports/<slug>.pdf and the report.pdf [...]",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_001",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Next 1 from the 2026-10-27 handoff: replace the per-session shutil.copyfile of each report PDF in src/ppx/runcard.py with a clone-or-copy helper: a [...]",
+          "text": "Agent proposed: Next 1 from the 2026-10-27 handoff: replace the per-session shutil.copyfile of each report PDF in src/ppx/runcard.py with a clone-or-copy helper: a copy-on-write clone through clonefile (macOS, ctypes) or the FICLONE ioctl (Linux btrfs/XFS), falling back to shutil.copyfile on any OSError; [...]",
+          "url": null
+        },
+        {
+          "id": "evt_002",
+          "kind": "decision",
+          "proposed_by": "human",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Clone each report with one cp call instead of the ctypes clonefile/FICLONE helper: `cp -c` on macOS (clonefile, falling back to a plain copy where [...]",
+          "text": "Rationale: Oliver's words: \"is it really necessary to do what you recommended and i just agreed to? shouldnt it just be super simple and that one liner?\" The ctypes route adds platform code and constants that can be wrong (the spike's first getattrlist constants were) for no gain over cp's built-in fallback; one process per report per session build is negligible.\nHuman accepted: Oliver's mid-turn message directed the simpler form; the AI agreed and built it: clone_or_copy in src/ppx/runcard.py (one cp call, -c on macOS, --reflink=auto elsewhere, check=True) at the two PDF copy sites (a sample's reports/<slug>.pdf and the report.pdf [...]",
+          "url": null
+        },
+        {
+          "id": "evt_005",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "Commit 4e09206 on feat/clone-report-copies (worktree .worktrees/ppx-clone-reports, branched from feat/phase3b-phantom-rule): clone_or_copy in [...]",
+          "text": null,
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_002",
+          "target": "evt_001",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_005",
+          "target": "evt_001",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_005",
+          "target": "evt_002",
+          "relation": "builds_on"
+        }
+      ],
+      "unshown_links": 0,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_010",
-      "related_event_ids": [],
+      "slug": "the-vague-cases-are-the-studys-subject",
+      "key_event_id": "evt_010",
       "session_id": "trace_20260320_c31df4",
       "project": "trace",
       "project_name": "TRACE",
       "month": "2026-03",
       "title": "The vague cases are the study's subject",
-      "text": "Correction: AI incorrectly excluded/downgraded 3 papers ([1187], [1194], [294]) during intensive audit because their abstracts didn't name specific LLM models - only saying 'artificial intelligence' or 'chatbot'. User corrected: papers that use AI but DON'T clearly document which model or how it was used are EXACTLY the kind of papers this study needs. The vague AI acknowledgment pattern (scoring 0 on A1 Model Named) is itself the phenomenon the TRACE paper studies. Inclusion criteria should be: if the paper appears to use AI/LLM as a tool in environmental science, include it even if the specific model isn't named - the poor documentation is a data point, not an exclusion reason. This reframes the screening: the question is 'did they use AI for env sci?' not 'can I confirm they used an LLM specifically?'",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_005",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "LLM screening implementation plan: 3-tier batched processing (Tier 1: 479 ambiguous records, Tier 2: 1,073 weak-env records, Tier 3: 1,788 strong-env [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_010",
+          "kind": "correction",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": null,
+          "execution": null,
+          "headline": "AI incorrectly excluded/downgraded 3 papers ([1187], [1194], [294]) during intensive audit because their abstracts didn't name specific LLM models - [...]",
+          "text": "Correction: AI incorrectly excluded/downgraded 3 papers ([1187], [1194], [294]) during intensive audit because their abstracts didn't name specific LLM models - only saying 'artificial intelligence' or 'chatbot'. User corrected: papers that use AI but DON'T clearly document which model or how it was used are EXACTLY the kind of papers this study needs. The vague AI acknowledgment pattern (scoring 0 on A1 Model Named) is itself the phenomenon the TRACE paper studies. Inclusion criteria should be: if the paper appears to use AI/LLM as a tool in environmental science, include it even if the specific model isn't named - the poor documentation is a data point, not an exclusion reason. This reframes the screening: the question is 'did they use AI for env sci?' not 'can I confirm they used an LLM specifically?'",
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_010",
+          "target": "evt_005",
+          "relation": "corrects"
+        }
+      ],
+      "unshown_links": 0,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_006",
-      "related_event_ids": [],
+      "slug": "megatonnes-are-not-metric-tons",
+      "key_event_id": "evt_006",
       "session_id": "trace_20261007_d3cb05",
       "project": "proofpress-experiments",
       "project_name": "proofpress experiments",
       "month": "2026-10",
       "title": "Megatonnes are not metric tons",
-      "text": "Agent proposed: Stop lowercasing units before comparing them. Both the key builder and the scorer read a unit against an explicit table of known spellings. Case is kept where it carries meaning (Mt is megatonnes, kt is kilotonnes, Gt is gigatonnes); case is ignored only in spelled-out words (\"Metric Tons\", \"Million\", \"tonnes\"). [...]\nRationale: Lowercasing was there so that formatting differences (\"Tonnes\" against \"tonnes\") would not count as wrong answers, a problem the toy runs ran into. For units, though, case is part of the meaning: in standard SI prefixes, M is mega and m is milli. Folding case makes megatonnes and metric tons look alike, so magnitude errors can neither be caught nor counted. [...]\nHuman accepted: Operator: \"i accept this revision. implement this.\"",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_002",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "proposed",
+          "resolved_by": "not_recorded",
+          "direction": null,
+          "execution": null,
+          "headline": "Replace the first Phase 1 key (report X's reduction targets) with a scope key: for report X, 2024 Scope 1, Scope 2 market-based, Scope 2 [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_004",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "revised",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Revise the scope-key proposal so that units, magnitude and patchy reporting are part of the key and the score.",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_006",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Stop lowercasing units before comparing them.",
+          "text": "Agent proposed: Stop lowercasing units before comparing them. Both the key builder and the scorer read a unit against an explicit table of known spellings. Case is kept where it carries meaning (Mt is megatonnes, kt is kilotonnes, Gt is gigatonnes); case is ignored only in spelled-out words (\"Metric Tons\", \"Million\", \"tonnes\"). [...]\nRationale: Lowercasing was there so that formatting differences (\"Tonnes\" against \"tonnes\") would not count as wrong answers, a problem the toy runs ran into. For units, though, case is part of the meaning: in standard SI prefixes, M is mega and m is milli. Folding case makes megatonnes and metric tons look alike, so magnitude errors can neither be caught nor counted. [...]\nHuman accepted: Operator: \"i accept this revision. implement this.\"",
+          "url": null
+        },
+        {
+          "id": "evt_008",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "collaborative",
+          "execution": "ai",
+          "headline": "Scope key for Phase 1: unit reading into tonnes CO2e (case-aware, ambiguous units refused), scope key models with a computed total check and [...]",
+          "text": null,
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_004",
+          "target": "evt_002",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_006",
+          "target": "evt_004",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_008",
+          "target": "evt_004",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_008",
+          "target": "evt_006",
+          "relation": "builds_on"
+        }
+      ],
+      "unshown_links": 0,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_024",
-      "related_event_ids": [],
+      "slug": "the-reviewer-should-not-know-the-answer-in-advance",
+      "key_event_id": "evt_024",
       "session_id": "trace_20261020_5f038f",
       "project": "proofpress-experiments",
       "project_name": "proofpress experiments",
       "month": "2026-10",
       "title": "The reviewer should not know the answer in advance",
-      "text": "Human proposed: Give the ProofPress side's reviewer as few deterministic rules as possible: like a human reviewer, it decides on its own whether and how far to verify each finding, and whether to approve, send back, or reject it, with no rules for specific situations such as chart readings. Record exactly what the reviewer is told, and consider a matching sentence for the Control side's handoff note.\nRationale: Operator's words: \"there should be less deterministic rules for the reviewer / verifier and it should mainly decide on its own if it wants to verify the claims or not ... it is still listing out so much of what it is supposed to do and even how to handle specific situations (like the chart reading thing). but that is in itself hand holding and will bias the proofpress side ... [...]\nHuman accepted: Operator accepted the short reviewer text (role, what each action does, decide every finding before finishing, the safety line; no verify or careful, no rules on figures, years, charts, or wording; no per-figure verdicts) and settled: the reviewer sees, word for word, the task the session under review was given, never a later step's; [...]",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_020",
+          "kind": "decision",
+          "proposed_by": "human",
+          "disposition": "proposed",
+          "resolved_by": "not_recorded",
+          "direction": null,
+          "execution": null,
+          "headline": "No part of the process, the AI reviewer included, should know the final deliverable (the closing spreadsheet) before the last step, so every arm [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_024",
+          "kind": "decision",
+          "proposed_by": "human",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Give the ProofPress side's reviewer as few deterministic rules as possible: like a human reviewer, it decides on its own whether and how far to [...]",
+          "text": "Human proposed: Give the ProofPress side's reviewer as few deterministic rules as possible: like a human reviewer, it decides on its own whether and how far to verify each finding, and whether to approve, send back, or reject it, with no rules for specific situations such as chart readings. Record exactly what the reviewer is told, and consider a matching sentence for the Control side's handoff note.\nRationale: Operator's words: \"there should be less deterministic rules for the reviewer / verifier and it should mainly decide on its own if it wants to verify the claims or not ... it is still listing out so much of what it is supposed to do and even how to handle specific situations (like the chart reading thing). but that is in itself hand holding and will bias the proofpress side ... [...]\nHuman accepted: Operator accepted the short reviewer text (role, what each action does, decide every finding before finishing, the safety line; no verify or careful, no rules on figures, years, charts, or wording; no per-figure verdicts) and settled: the reviewer sees, word for word, the task the session under review was given, never a later step's; [...]",
+          "url": null
+        },
+        {
+          "id": "evt_026",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "Reviewer setup v4 and session texts v3, built and tested: the reviewer gets its role, what each action does, and the reviewed session's task word for [...]",
+          "text": null,
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_024",
+          "target": "evt_020",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_026",
+          "target": "evt_020",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_026",
+          "target": "evt_024",
+          "relation": "builds_on"
+        }
+      ],
+      "unshown_links": 0,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_005",
-      "related_event_ids": [],
+      "slug": "tests-that-could-not-fail",
+      "key_event_id": "evt_005",
       "session_id": "trace_20260831_83f280",
       "project": "coeqwal",
       "project_name": "COEQWAL",
       "month": "2026-08",
       "title": "Tests that could not fail",
-      "text": "Correction: A high-effort code review of the Task 6 diff caught that my two new Stats-capture assertions were VACUOUS: `drawer.locator(\"svg\").first()` matches the share drawer's own MUI close icon, and stageShareItem deliberately swallows capture errors and stages the card anyway, so a totally failed capture would still have passed both tests. The core claim of the PR was untested. Fixed by asserting the capture's own role=\"img\" thumbnail (SvgThumbnail sets role + aria-label from the figure title), then PROVED the fix by temporarily making the compose branch throw: both assertions went red, and green again on restore. [...]",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_005",
+          "kind": "correction",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": null,
+          "execution": null,
+          "headline": "A high-effort code review of the Task 6 diff caught that my two new Stats-capture assertions were VACUOUS: `drawer.locator(\"svg\").first()` matches [...]",
+          "text": "Correction: A high-effort code review of the Task 6 diff caught that my two new Stats-capture assertions were VACUOUS: `drawer.locator(\"svg\").first()` matches the share drawer's own MUI close icon, and stageShareItem deliberately swallows capture errors and stages the card anyway, so a totally failed capture would still have passed both tests. The core claim of the PR was untested. Fixed by asserting the capture's own role=\"img\" thumbnail (SvgThumbnail sets role + aria-label from the figure title), then PROVED the fix by temporarily making the compose branch throw: both assertions went red, and green again on restore. [...]",
+          "url": null
+        },
+        {
+          "id": "ext-1",
+          "kind": "external",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": null,
+          "execution": null,
+          "headline": "coeqwal-website pull request 335",
+          "text": null,
+          "url": "https://github.com/berkeley-gif/coeqwal-website/pull/335"
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_005",
+          "target": "ext-1",
+          "relation": "corrects"
+        }
+      ],
+      "unshown_links": 0,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_002",
-      "related_event_ids": [
-        "evt_005"
-      ],
+      "slug": "measure-before-choosing-a-retrieval-default",
+      "key_event_id": "evt_002",
       "session_id": "trace_20261008_147087",
       "project": "trace",
       "project_name": "TRACE",
       "month": "2026-10",
       "title": "Measure before choosing a retrieval default",
-      "text": "Human accepted: Accepted with an added requirement: before implementing, critically investigate why local embedding scores are so low, whether a smaller or larger offline embedding model is right, and how topic/semantic matching is done in comparable systems; calibration values must come from that investigation.\nRationale: Measured on this project's own store (352 learnings; 100 session-description queries with relevant = learnings extracted from that session; details in evt_004 and notes/2026-10-12-learn-recall-investigation.md). No absolute cosine cutoff separates relevant from irrelevant for any model (best reachable F1 0.10 to 0.16), and random-pair baselines differ by model (0.21 to 0.68), so a per-provider constant would still be wrong on realistic queries. [...]\nHuman accepted: Chose \"Hybrid ranking + retrieval-32M model\" over keeping the 8M model or the threshold-only plan.",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_002",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "[...] move the embedding default_threshold from EmbeddingBackend onto each provider [...]",
+          "text": "Human accepted: Accepted with an added requirement: before implementing, critically investigate why local embedding scores are so low, whether a smaller or larger offline embedding model is right, and how topic/semantic matching is done in comparable systems; calibration values must come from that investigation.",
+          "url": null
+        },
+        {
+          "id": "evt_005",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Revise items 1 and 3 of the accepted recall plan: replace absolute cosine thresholding with hybrid ranking.",
+          "text": "Rationale: Measured on this project's own store (352 learnings; 100 session-description queries with relevant = learnings extracted from that session; details in evt_004 and notes/2026-10-12-learn-recall-investigation.md). No absolute cosine cutoff separates relevant from irrelevant for any model (best reachable F1 0.10 to 0.16), and random-pair baselines differ by model (0.21 to 0.68), so a per-provider constant would still be wrong on realistic queries. [...]\nHuman accepted: Chose \"Hybrid ranking + retrieval-32M model\" over keeping the 8M model or the threshold-only plan.",
+          "url": null
+        },
+        {
+          "id": "evt_007",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "proposed",
+          "resolved_by": "not_recorded",
+          "direction": null,
+          "execution": null,
+          "headline": "Small-store recall (fewer than 8 learnings) returns every learning up to the limit, ranked by the same hybrid fusion as large stores with ties broken [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_009",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "proposed",
+          "resolved_by": "not_recorded",
+          "direction": null,
+          "execution": null,
+          "headline": "Decay no longer enters the ordering of candidates with different evidence.",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_010",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Default ranking is hybrid only when a transformer embedding provider (fastembed, default model snowflake-arctic-embed-s with its query prefix) is [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_011",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "PR #80 \"feat(learn): hybrid BM25 + embedding recall ranking with a relative floor, decay as tie-breaker, transformer-or-BM25 selection\" (branch [...]",
+          "text": null,
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_005",
+          "target": "evt_002",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_007",
+          "target": "evt_005",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_009",
+          "target": "evt_005",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_010",
+          "target": "evt_005",
+          "relation": "revises"
+        },
+        {
+          "source": "evt_011",
+          "target": "evt_002",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_011",
+          "target": "evt_005",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_011",
+          "target": "evt_007",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_011",
+          "target": "evt_009",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_011",
+          "target": "evt_010",
+          "relation": "builds_on"
+        }
+      ],
+      "unshown_links": 1,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_006",
-      "related_event_ids": [],
+      "slug": "refusing-a-record-that-reports-itself-complete",
+      "key_event_id": "evt_006",
       "session_id": "trace_20260908_f7429b",
       "project": "rsi-exam",
       "project_name": "RSI-Exam provenance study",
       "month": "2026-09",
       "title": "Refusing a record that reports itself complete",
-      "text": "Agent proposed: Rejected alternative, recorded for deliberation capture and left for the operator to mark: when the experiment log declares a parent that has no snapshot, drop that parent from parent_ids silently so the child becomes the lineage root. This would let the Opus probe rollout build a record with zero schema change and would pass the verifier's one-root rule as it stands.\nRationale: Considered and set aside in favour of the unsnapshotted_parent_ids field. Dropping the parent produces a record that reports itself complete while omitting lineage the log states, which is exactly the fail-open behaviour removed from the producer in pull request #19 for unrecognised snapshot directories; reintroducing the same class of silent omission one day later, in the lineage the record exists to carry, would undercut the fail-loud discipline the repository is built on. [...]\nHuman rejected: Operator's words on 2026-09-08, after a clarifying exchange: \"i mean i accept your suggestions. so, i accept 1 and 2 and reject 3.\" His first phrasing, \"(3) i accept this as well\", accepted the recommendation to reject; the clarification removes the ambiguity. [...]",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_006",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "rejected",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Rejected alternative, recorded for deliberation capture and left for the operator to mark: when the experiment log declares a parent that has no [...]",
+          "text": "Agent proposed: Rejected alternative, recorded for deliberation capture and left for the operator to mark: when the experiment log declares a parent that has no snapshot, drop that parent from parent_ids silently so the child becomes the lineage root. This would let the Opus probe rollout build a record with zero schema change and would pass the verifier's one-root rule as it stands.\nRationale: Considered and set aside in favour of the unsnapshotted_parent_ids field. Dropping the parent produces a record that reports itself complete while omitting lineage the log states, which is exactly the fail-open behaviour removed from the producer in pull request #19 for unrecognised snapshot directories; reintroducing the same class of silent omission one day later, in the lineage the record exists to carry, would undercut the fail-loud discipline the repository is built on. [...]\nHuman rejected: Operator's words on 2026-09-08, after a clarifying exchange: \"i mean i accept your suggestions. so, i accept 1 and 2 and reject 3.\" His first phrasing, \"(3) i accept this as well\", accepted the recommendation to reject; the clarification removes the ambiguity. [...]",
+          "url": null
+        }
+      ],
+      "edges": [],
+      "unshown_links": 0,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_007",
-      "related_event_ids": [],
+      "slug": "require-a-visual-check-before-export",
+      "key_event_id": "evt_007",
       "session_id": "trace_20260710_bdff9e",
       "project": "coeqwal",
       "project_name": "COEQWAL",
       "month": "2026-07",
       "title": "Require a visual check before export",
-      "text": "Correction: Oliver reviewed the first version of the loading-speed brief and corrected two things: (1) wording was too padded for the audience (\"two worries turned out to be non-issues\" and similar framing removed; brief tightened to timing facts only); (2) required a visual QA pass before export, which caught a real layout bug: the 4.7s value labels on full-width bars overflowed the chart-card edge (bars rescaled to 84% max so labels always fit inside). Verified after fixes via full-page screenshots at desktop/narrow widths in light and dark themes.",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_006",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "Produced a non-technical findings brief (Claude artifact, print-to-PDF ready) explaining the latency measurements [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_007",
+          "kind": "correction",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": null,
+          "execution": null,
+          "headline": "Oliver reviewed the first version of the loading-speed brief and corrected two things: (1) wording was too padded for the audience (\"two worries [...]",
+          "text": "Correction: Oliver reviewed the first version of the loading-speed brief and corrected two things: (1) wording was too padded for the audience (\"two worries turned out to be non-issues\" and similar framing removed; brief tightened to timing facts only); (2) required a visual QA pass before export, which caught a real layout bug: the 4.7s value labels on full-width bars overflowed the chart-card edge (bars rescaled to 84% max so labels always fit inside). Verified after fixes via full-page screenshots at desktop/narrow widths in light and dark themes.",
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_007",
+          "target": "evt_006",
+          "relation": "corrects"
+        }
+      ],
+      "unshown_links": 1,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_002",
-      "related_event_ids": [],
+      "slug": "one-pr-reviewed-before-it-is-called-done",
+      "key_event_id": "evt_002",
       "session_id": "trace_20261014_5d3052",
       "project": "proofpress",
       "project_name": "proofpress",
       "month": "2026-10",
       "title": "One PR, reviewed before it is called done",
-      "text": "Agent proposed: ProofPress context-lineage fix design: one PR off origin/main (fix/context-lineage). [...]\nHuman revised: Human kept the context-lineage design but rejected splitting the follow-ups: one PR must also fix the shadowed admission in review_v2 and the uneven disclosure filtering in receipt_v2 / traverse_graph_v2, then go through inline adversarial passes and gpt-6.1-sol passes before it is called good to go.",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_002",
+          "kind": "decision",
+          "proposed_by": "ai",
+          "disposition": "revised",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "ProofPress context-lineage fix design: one PR off origin/main (fix/context-lineage).",
+          "text": "Agent proposed: ProofPress context-lineage fix design: one PR off origin/main (fix/context-lineage). [...]\nHuman revised: Human kept the context-lineage design but rejected splitting the follow-ups: one PR must also fix the shadowed admission in review_v2 and the uneven disclosure filtering in receipt_v2 / traverse_graph_v2, then go through inline adversarial passes and gpt-6.1-sol passes before it is called good to go.",
+          "url": null
+        },
+        {
+          "id": "evt_003",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "Implementation plan for the ProofPress context-lineage PR (fix/context-lineage off origin/main 4bd2047): 5 TDD tasks (resolver + context_v2; [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_004",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "Reference patch for the context-lineage fix, built and verified on a throwaway detached copy of origin/main 4bd2047 (kernel resolver, [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_005",
+          "kind": "decision",
+          "proposed_by": "human",
+          "disposition": "accepted",
+          "resolved_by": "human",
+          "direction": null,
+          "execution": null,
+          "headline": "Single ProofPress PR (fix/context-lineage): the context-lineage plan plus (a) review decisions that would be silently shadowed are refused, and (b) [...]",
+          "text": null,
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_003",
+          "target": "evt_002",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_004",
+          "target": "evt_002",
+          "relation": "builds_on"
+        },
+        {
+          "source": "evt_005",
+          "target": "evt_002",
+          "relation": "revises"
+        }
+      ],
+      "unshown_links": 0,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_005",
-      "related_event_ids": [],
+      "slug": "check-that-the-health-checker-catches-broken-setups",
+      "key_event_id": "evt_005",
       "session_id": "trace_20260821_6bebf5",
       "project": "trace",
       "project_name": "TRACE",
       "month": "2026-08",
       "title": "Check that the health checker catches broken setups",
-      "text": "Correction: A Tier-1 code-review pass over the branch found nine real defects in the conformance probes, all false-negatives - the checker blessing deployments that are actually broken, which matters more than usual because INV-11 makes a clean doctor report load-bearing. The most serious: the hook checks flattened settings.json and discarded the host event, so moving the whole PostToolUse registration block to PreToolUse still reported ok - the decision-audit hook could never fire, which is the very defect INV-11 was minted for. Fixed by deriving the required event per hook from the installer's own settings_template.json, the same derive-don't-restate rule the rest of the module follows. [...]",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_003",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "Implemented the conformance layer and the `trace-mcp doctor` CLI [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_005",
+          "kind": "correction",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": null,
+          "execution": null,
+          "headline": "A Tier-1 code-review pass over the branch found nine real defects in the conformance probes, all false-negatives - the checker blessing deployments [...]",
+          "text": "Correction: A Tier-1 code-review pass over the branch found nine real defects in the conformance probes, all false-negatives - the checker blessing deployments that are actually broken, which matters more than usual because INV-11 makes a clean doctor report load-bearing. The most serious: the hook checks flattened settings.json and discarded the host event, so moving the whole PostToolUse registration block to PreToolUse still reported ok - the decision-audit hook could never fire, which is the very defect INV-11 was minted for. Fixed by deriving the required event per hook from the installer's own settings_template.json, the same derive-don't-restate rule the rest of the module follows. [...]",
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_005",
+          "target": "evt_003",
+          "relation": "corrects"
+        }
+      ],
+      "unshown_links": 1,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_010",
-      "related_event_ids": [],
+      "slug": "one-sheet-instead-of-four",
+      "key_event_id": "evt_010",
       "session_id": "trace_20261007_d3cb05",
       "project": "proofpress-experiments",
       "project_name": "proofpress experiments",
       "month": "2026-10",
       "title": "One sheet instead of four",
-      "text": "Correction: The operator cut the scope key workbook down to a single sheet (\"Values\"), dropping the How to fill, Reports, and Example sheets the harness had generated, and set a standing rule: hand-filled xlsx files are one sheet unless there is a clear reason for more, because extra sheets clutter the form and make mistakes more likely. Fixed in 33c6f40. The scope sheet is now one sheet, read by column header whatever its name. [...]",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_008",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "collaborative",
+          "execution": "ai",
+          "headline": "Scope key for Phase 1: unit reading into tonnes CO2e (case-aware, ambiguous units refused), scope key models with a computed total check and [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_010",
+          "kind": "correction",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": null,
+          "execution": null,
+          "headline": "The operator cut the scope key workbook down to a single sheet (\"Values\"), dropping the How to fill, Reports, and Example sheets the harness had [...]",
+          "text": "Correction: The operator cut the scope key workbook down to a single sheet (\"Values\"), dropping the How to fill, Reports, and Example sheets the harness had generated, and set a standing rule: hand-filled xlsx files are one sheet unless there is a clear reason for more, because extra sheets clutter the form and make mistakes more likely. Fixed in 33c6f40. The scope sheet is now one sheet, read by column header whatever its name. [...]",
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_010",
+          "target": "evt_008",
+          "relation": "corrects"
+        }
+      ],
+      "unshown_links": 2,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     },
     {
-      "event_id": "evt_036",
-      "related_event_ids": [],
+      "slug": "a-required-final-gate-caught-an-unlocked-hot-path",
+      "key_event_id": "evt_036",
       "session_id": "trace_20260518_5dd958",
       "project": "trace",
       "project_name": "TRACE",
       "month": "2026-05",
       "title": "A required final gate caught an unlocked hot path",
-      "text": "Correction: The user-mandated 3-set final gate caught a real defect in my P9(b) work. evt_028 claimed \"wrapped all 5 knowledge-store RMW spans\". WRONG - there are 6 RMW spans; `_recall_hook` (extensions/learn/__init__.py:~97-119) - the HIGHEST-FREQUENCY path (core auto-recall, invoked from server.py on session-start/decision-propose/contribution) - was left UNLOCKED while its tool twin `trace_learn_recall` and the other 4 spans were locked. Independently corroborated by 2 of 3 final reviewers (R1 correctness CONDITIONAL + R3 reliability CONDITIONAL); R3 demonstrated a deterministic lost-update (unlocked _recall_hook save clobbers a concurrently-committed locked add → new learning permanently lost). [...]",
-      "approved_on": "2026-10-31",
-      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken (owner instruction 2026-11-01)"
+      "nodes": [
+        {
+          "id": "evt_028",
+          "kind": "contribution",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": "human",
+          "execution": "ai",
+          "headline": "[...] Wrapped all 5 knowledge-store RMW spans in extensions/learn/__init__.py [...]",
+          "text": null,
+          "url": null
+        },
+        {
+          "id": "evt_036",
+          "kind": "correction",
+          "proposed_by": null,
+          "disposition": null,
+          "resolved_by": null,
+          "direction": null,
+          "execution": null,
+          "headline": "The user-mandated 3-set final gate caught a real defect in my P9(b) work.",
+          "text": "Correction: The user-mandated 3-set final gate caught a real defect in my P9(b) work. evt_028 claimed \"wrapped all 5 knowledge-store RMW spans\". WRONG - there are 6 RMW spans; `_recall_hook` (extensions/learn/__init__.py:~97-119) - the HIGHEST-FREQUENCY path (core auto-recall, invoked from server.py on session-start/decision-propose/contribution) - was left UNLOCKED while its tool twin `trace_learn_recall` and the other 4 spans were locked. Independently corroborated by 2 of 3 final reviewers (R1 correctness CONDITIONAL + R3 reliability CONDITIONAL); R3 demonstrated a deterministic lost-update (unlocked _recall_hook save clobbers a concurrently-committed locked add → new learning permanently lost). [...]",
+          "url": null
+        }
+      ],
+      "edges": [
+        {
+          "source": "evt_036",
+          "target": "evt_028",
+          "relation": "corrects"
+        }
+      ],
+      "unshown_links": 2,
+      "approved_on": "2026-11-01",
+      "approved_by": "owner-delegated panel: 2 Claude + 3 gpt-6.1-sol independent selection passes, tie-broken; linked-record headlines added from the same chains (owner instruction 2026-11-01)"
     }
   ]
 }

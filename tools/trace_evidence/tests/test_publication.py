@@ -15,6 +15,9 @@ from tools.trace_evidence.models import EvidenceReport
 SITE = Path(__file__).resolve().parents[3]
 EVIDENCE = SITE / "static/evidence/evidence.json"
 PAGE = SITE / "projects/trace/trace-evidence.md"
+DECISIONS = SITE / "projects/trace/trace-decisions.md"
+WIDGET = ("chains-graph.mjs", "chains-graph.css")
+QUOTE_FRAGMENTS = {"_evidence_excerpts.md", "_evidence_graph.md"}
 
 
 def _report() -> EvidenceReport:
@@ -28,10 +31,24 @@ def test_all_public_files_committed():
 
 def test_committed_json_matches_closed_schema_and_excerpts_are_approved():
     rep = _report()
-    assert rep.schema_version == 2
+    assert rep.schema_version == 3
     for x in rep.excerpts:
         assert x.approved_by.strip() and x.approved_on
         assert x.project in {p.key for p in rep.projects}
+
+
+def test_committed_chains_are_well_formed_graphs():
+    rep = _report()
+    assert len({x.slug for x in rep.excerpts}) == len(rep.excerpts)
+    for x in rep.excerpts:
+        ids = [n.id for n in x.nodes]
+        assert len(set(ids)) == len(ids) and x.key_event_id in ids
+        for e in x.edges:
+            assert e.source in ids and e.target in ids and e.source != e.target
+        for n in x.nodes:
+            assert n.headline.strip()
+            assert (n.url is not None) == (n.kind == "external")
+            assert n.url is None or n.url.startswith("https://")
 
 
 def test_committed_outputs_are_exactly_the_render_of_committed_json():
@@ -64,36 +81,42 @@ def test_slugs_are_public_ids_only():
 
 
 def test_page_copy_rules():
-    authored = [PAGE, *(SITE / p for p in PUBLIC_FILES if p.suffix == ".md")]
+    authored = [PAGE, DECISIONS, *(SITE / p for p in PUBLIC_FILES if p.suffix == ".md")]
     for f in authored:
         text = f.read_text()
         assert "—" not in text and "–" not in text and " -- " not in text, f.name
-        if f.name != "_evidence_excerpts.md":
+        if f.name not in QUOTE_FRAGMENTS:
             # Claims about the records. Verbatim quotes use these words in their
             # ordinary sense ("verified after fixes", "a Next.js application").
             assert not re.search(r"\b(verified|proven|tamper-evident|trustless)\b", text, re.I), f.name
             assert not re.search(r"\b(applications?|accelerators?|investors?|fundrais\w*)\b", text, re.I), f.name
 
 
-def test_page_includes_each_fragment_once():
-    text = PAGE.read_text()
-    for frag in ("_evidence_claim.md", "_evidence_table.md", "_evidence_methods.md", "_evidence_contributions.md", "_evidence_excerpts.md"):
-        assert text.count(f"{{include}} {frag}") == 1, frag
+def test_pages_include_each_fragment_exactly_once():
+    want = {
+        PAGE: ("_evidence_claim.md", "_evidence_table.md", "_evidence_methods.md", "_evidence_contributions.md"),
+        DECISIONS: ("_evidence_graph.md", "_evidence_excerpts.md"),
+    }
+    pages = {pg: pg.read_text() for pg in want}
+    for pg, frags in want.items():
+        for frag in frags:
+            assert sum(t.count(f"{{include}} {frag}") for t in pages.values()) == 1, frag
+            assert pages[pg].count(f"{{include}} {frag}") == 1, (pg.name, frag)
+
+
+def test_overview_links_to_decision_chains_and_back():
+    assert "/trace-decisions" in PAGE.read_text()
+    assert "/trace-evidence" in DECISIONS.read_text()
+
+
+def test_widget_module_holds_no_data():
+    js = (SITE / "projects/trace" / WIDGET[0]).read_text()
+    assert 'model.get("chains")' in js and "export default" in js
+    assert "evt_" not in js and "trace_20" not in js
 
 
 def test_managed_directories_hold_only_generated_files():
     expected = {p.name for p in PUBLIC_FILES if p.parent == Path("static/evidence")}
     assert {f.name for f in (SITE / "static/evidence").iterdir()} == expected
     page_dir = {f.name for f in (SITE / "projects/trace").iterdir()}
-    assert page_dir == {p.name for p in PUBLIC_FILES if p.parent == Path("projects/trace")} | {"trace-evidence.md"}
-
-
-def test_synthetic_example_is_valid_linked_json():
-    import json
-
-    text = PAGE.read_text()
-    block = text[text.index("```json") + len("```json") : text.index("```", text.index("```json") + 7)]
-    events = json.loads(block)
-    ids = {e["id"] for e in events}
-    refs = {r for e in events for r in (e.get("contribution") or {}).get("related_decision_ids", [])}
-    assert refs and refs <= ids
+    assert page_dir == {p.name for p in PUBLIC_FILES if p.parent == Path("projects/trace")} | {PAGE.name, DECISIONS.name, *WIDGET}
