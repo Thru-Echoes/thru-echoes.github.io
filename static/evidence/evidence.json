@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "as_of": "2026-11-01T00:24:48Z",
+  "as_of": "2026-11-01T00:56:52Z",
   "coverage": {
     "cutoff": "2026-10-31T00:00:00Z",
     "sessions": 267,
@@ -63,7 +63,7 @@
     {
       "key": "proofpress",
       "name": "proofpress",
-      "url": null,
+      "url": "https://github.com/chenmingtang830/proofpress",
       "sessions": 5,
       "open_sessions": 0,
       "first": "2026-09-30",
@@ -101,8 +101,8 @@
       "discoveries": 5
     },
     {
-      "key": "private-research",
-      "name": "Private research repository",
+      "key": "proofpress-experiments",
+      "name": "proofpress experiments",
       "url": null,
       "sessions": 45,
       "open_sessions": 4,
@@ -145,7 +145,7 @@
     },
     {
       "key": "coeqwal",
-      "name": "COEQWAL (contract client work)",
+      "name": "COEQWAL",
       "url": null,
       "sessions": 56,
       "open_sessions": 2,
@@ -277,7 +277,7 @@
       "counts": {
         "trace": 4,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -287,7 +287,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -297,7 +297,7 @@
       "counts": {
         "trace": 4,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -307,7 +307,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -317,7 +317,7 @@
       "counts": {
         "trace": 9,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -327,7 +327,7 @@
       "counts": {
         "trace": 7,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -337,7 +337,7 @@
       "counts": {
         "trace": 9,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -347,7 +347,7 @@
       "counts": {
         "trace": 1,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -357,7 +357,7 @@
       "counts": {
         "trace": 3,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -367,7 +367,7 @@
       "counts": {
         "trace": 4,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -377,7 +377,7 @@
       "counts": {
         "trace": 2,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -387,7 +387,7 @@
       "counts": {
         "trace": 3,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 1,
         "rsi-exam": 0
       }
@@ -397,7 +397,7 @@
       "counts": {
         "trace": 9,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 1,
         "rsi-exam": 0
       }
@@ -407,7 +407,7 @@
       "counts": {
         "trace": 9,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 2,
         "rsi-exam": 0
       }
@@ -417,7 +417,7 @@
       "counts": {
         "trace": 3,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -427,7 +427,7 @@
       "counts": {
         "trace": 3,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 10,
         "rsi-exam": 0
       }
@@ -437,7 +437,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 6,
         "rsi-exam": 0
       }
@@ -447,7 +447,7 @@
       "counts": {
         "trace": 2,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 5,
         "rsi-exam": 0
       }
@@ -457,7 +457,7 @@
       "counts": {
         "trace": 12,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 8,
         "rsi-exam": 0
       }
@@ -467,7 +467,7 @@
       "counts": {
         "trace": 10,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 2,
         "rsi-exam": 0
       }
@@ -477,7 +477,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -487,7 +487,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -497,7 +497,7 @@
       "counts": {
         "trace": 11,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -507,7 +507,7 @@
       "counts": {
         "trace": 8,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 6,
         "rsi-exam": 0
       }
@@ -517,7 +517,7 @@
       "counts": {
         "trace": 12,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 8,
         "rsi-exam": 13
       }
@@ -527,7 +527,7 @@
       "counts": {
         "trace": 1,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 1,
         "rsi-exam": 11
       }
@@ -537,7 +537,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 0,
+        "proofpress-experiments": 0,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -547,7 +547,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 11,
+        "proofpress-experiments": 11,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -557,7 +557,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 1,
-        "private-research": 6,
+        "proofpress-experiments": 6,
         "coeqwal": 1,
         "rsi-exam": 0
       }
@@ -567,7 +567,7 @@
       "counts": {
         "trace": 4,
         "proofpress": 1,
-        "private-research": 5,
+        "proofpress-experiments": 5,
         "coeqwal": 2,
         "rsi-exam": 0
       }
@@ -577,7 +577,7 @@
       "counts": {
         "trace": 7,
         "proofpress": 3,
-        "private-research": 8,
+        "proofpress-experiments": 8,
         "coeqwal": 2,
         "rsi-exam": 0
       }
@@ -587,7 +587,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 8,
+        "proofpress-experiments": 8,
         "coeqwal": 0,
         "rsi-exam": 0
       }
@@ -597,7 +597,7 @@
       "counts": {
         "trace": 0,
         "proofpress": 0,
-        "private-research": 7,
+        "proofpress-experiments": 7,
         "coeqwal": 1,
         "rsi-exam": 0
       }

@@ -24,8 +24,13 @@ and who did the work; and annotations, including corrections. The format is
 defined in the
 [specification](https://github.com/Thru-Echoes/TRACE/blob/main/docs/specification.md).
 
-I build TRACE and I run it on my own work. This page is a snapshot of those
-records from five project workspaces, published by hand.
+I build TRACE and I run it on my own work. TRACE records also feed
+[proofpress](https://github.com/chenmingtang830/proofpress), which ingests
+them; I co-founded Continuara Labs, the company building proofpress.
+
+This page is a snapshot, published by hand, of the records from five project
+workspaces: TRACE itself, proofpress, proofpress experiments, COEQWAL (contract
+client work), and the RSI-Exam provenance study.
 
 ## Summary
 
