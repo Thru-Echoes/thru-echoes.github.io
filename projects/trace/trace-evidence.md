@@ -122,6 +122,17 @@ built." They are not from my records.
 ]
 ```
 
+## Decision chains from the records
+
+These are real chains from the records: an agent's proposal and what a human
+did with it, or a mistake and the correction that points back at it. Quotes are
+verbatim, except that other people's names are replaced with their role and
+dashes are normalized. They were picked for clarity and for spread across the
+five workspaces.
+
+```{include} _evidence_excerpts.md
+```
+
 ## Methods and limits
 
 - **Self-logged.** The agent and I write these records during the work. Each
