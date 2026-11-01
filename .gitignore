@@ -57,8 +57,8 @@ static/variations/
 # static/diagrams/waggle/ aren't accidentally caught.)
 /waggle/
 
-# Claude Code project config (settings + hooks + session state). Local
-# to this machine. .mcp.json contains a hardcoded local TRACE path, so
-# it can't be committed as-is.
+# Claude Code / TRACE config (settings, hooks, session state, MCP server
+# with an absolute local path). Kept in the maintainer's workspace outside
+# this repo; ignored here as a backstop in case a copy lands in the repo.
 .claude/
 .mcp.json

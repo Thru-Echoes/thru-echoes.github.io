@@ -188,10 +188,15 @@ def test_no_private_terms_in_unpushed_commits():
         ["git", "log", "-p", "--format=%an <%ae>%n%cn <%ce>%n%B", "origin/main..HEAD"],
         cwd=SITE, capture_output=True, text=True, check=True,
     ).stdout  # fmt: skip
+    # Removed lines ("-") already exist on origin/main; only added content,
+    # messages, and headers can newly disclose anything.
+    log = "\n".join(ln for ln in log.splitlines() if not (ln.startswith("-") and not ln.startswith("---")))
     terms = _private_terms()
     assert not any(_term_hit(log, t) for t in terms), "an unpushed commit (content, message, or header) contains a private term"
     reg = json.loads((STORE / "projects.json").read_text())["projects"]
     forbidden = {a.strip().lower() for k, v in reg.items() for a in [k, *(v.get("aliases") or [])]} - PUBLIC_OK_TOKENS - GENERIC_WORDS
     assert _token_hits(log, forbidden) == 0, "an unpushed commit contains a non-public registry name"
-    authors = set(re.findall(r"<([^>]+)>", log))
-    assert authors <= {"omuellerklein@berkeley.edu"}, f"{len(authors)} unexpected commit identities"
+    idents = subprocess.run(
+        ["git", "log", "--format=%ae%n%ce", "origin/main..HEAD"], cwd=SITE, capture_output=True, text=True, check=True
+    ).stdout.split()
+    assert set(idents) <= {"omuellerklein@berkeley.edu"}, f"{len(set(idents))} unexpected commit identities"
