@@ -14,10 +14,11 @@ from tools.trace_evidence.models import EvidenceReport
 
 SITE = Path(__file__).resolve().parents[3]
 EVIDENCE = SITE / "static/evidence/evidence.json"
-PAGE = SITE / "projects/trace/trace-evidence.md"
-DECISIONS = SITE / "projects/trace/trace-decisions.md"
+PAGE = SITE / "projects/trace/trace-usage.md"  # aggregate usage overview, /trace-usage
+DECISIONS = SITE / "projects/trace/trace-evidence.md"  # decision chains, /trace-evidence
+LANDING = SITE / "index.md"
 WIDGET = ("chains-graph.mjs", "chains-graph.css")
-QUOTE_FRAGMENTS = {"_evidence_excerpts.md", "_evidence_graph.md"}
+QUOTE_FRAGMENTS = {"_evidence_excerpts.md", "_evidence_graph.md", "_evidence_featured.md"}
 
 
 def _report() -> EvidenceReport:
@@ -96,6 +97,7 @@ def test_pages_include_each_fragment_exactly_once():
     want = {
         PAGE: ("_evidence_claim.md", "_evidence_table.md", "_evidence_methods.md", "_evidence_contributions.md"),
         DECISIONS: ("_evidence_graph.md", "_evidence_excerpts.md"),
+        LANDING: ("projects/trace/_evidence_featured.md",),
     }
     pages = {pg: pg.read_text() for pg in want}
     for pg, frags in want.items():
@@ -104,9 +106,32 @@ def test_pages_include_each_fragment_exactly_once():
             assert pages[pg].count(f"{{include}} {frag}") == 1, (pg.name, frag)
 
 
-def test_overview_links_to_decision_chains_and_back():
-    assert "/trace-decisions" in PAGE.read_text()
-    assert "/trace-evidence" in DECISIONS.read_text()
+def test_usage_and_evidence_pages_link_to_each_other():
+    assert "(/trace-evidence)" in PAGE.read_text() or ":link: /trace-evidence" in PAGE.read_text()
+    assert "(/trace-usage)" in DECISIONS.read_text()
+
+
+def test_landing_buttons_name_their_destination():
+    text = LANDING.read_text()
+    assert 'href="/trace-evidence" class="trace-callout-button-secondary">The evidence: decision chains' in text
+    assert 'href="/trace-usage" class="trace-callout-button-secondary">Usage overview' in text
+    assert "See the evidence" not in text and "/trace-decisions" not in text
+
+
+def test_landing_featured_chain_is_present_exactly_once():
+    # index.md includes the featured fragment; with no featured chain the
+    # landing page would show an empty slot under the TRACE callout.
+    rep = _report()
+    assert sum(x.featured for x in rep.excerpts) == 1
+    assert (SITE / "projects/trace/_evidence_featured.md").read_text().strip()
+
+
+def test_rulings_are_human():
+    rep = _report()
+    for x in rep.excerpts:
+        for n in x.nodes:
+            if n.resolution:
+                assert n.kind == "decision" and n.disposition in ("rejected", "revised") and n.resolved_by == "human"
 
 
 def test_widget_module_holds_no_data():

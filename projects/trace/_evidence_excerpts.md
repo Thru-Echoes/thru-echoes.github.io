@@ -1,36 +1,64 @@
-### Shouldn't it just be the one-liner?
+### One PR, held to a clean standard
 
-*proofpress experiments, October 2026*
+*proofpress, October 2026*
 
-> **evt\_001, Decision: agent proposal, accepted by human**
+> **evt\_002, Decision: agent proposal, revised by human**
 >
-> **Agent proposed:** Next 1 from the 2026-10-27 handoff: replace the per-session shutil.copyfile of each report PDF in src/ppx/runcard.py with a clone-or-copy helper: a copy-on-write clone through clonefile \(macOS, ctypes\) or the FICLONE ioctl \(Linux btrfs/XFS\), falling back to shutil.copyfile on any OSError; \[...\]
+> **Agent proposed:** ProofPress context-lineage fix design: one PR off origin/main \(fix/context-lineage\). Add a lineage resolver \(revision\_of, reproposal\_of, supersession edges; rank usable \> pending \> sent back; latest wins\) used by context\_v2, traverse\_graph\_v2 \(disclose\_v1 inherits\), and receipt\_v2. \[...\]
 
-> **evt\_002, Decision: human proposal, accepted by human**
+> **evt\_002, Human revised**
 >
-> **Rationale:** Oliver's words: "is it really necessary to do what you recommended and i just agreed to? shouldnt it just be super simple and that one liner?" The ctypes route adds platform code and constants that can be wrong \(the spike's first getattrlist constants were\) for no gain over cp's built-in fallback; one process per report per session build is negligible.
+> Human kept the context-lineage design but rejected splitting the follow-ups: one PR must also fix the shadowed admission in review\_v2 and the uneven disclosure filtering in receipt\_v2 / traverse\_graph\_v2, then go through inline adversarial passes and gpt-6.1-sol passes before it is called good to go.
+
+> **evt\_003, Contribution: human idea, AI built**
 >
-> **Human accepted:** Oliver's mid-turn message directed the simpler form; the AI agreed and built it: clone\_or\_copy in src/ppx/runcard.py \(one cp call, -c on macOS, --reflink=auto elsewhere, check=True\) at the two PDF copy sites \(a sample's reports/\<slug\>.pdf and the report.pdf \[...\]
+> Implementation plan for the ProofPress context-lineage PR \(fix/context-lineage off origin/main 4bd2047\): 5 TDD tasks \(resolver \+ context\_v2; \[...\]
 
-> **evt\_005, Contribution: human idea, AI built**
+> **evt\_004, Contribution: human idea, AI built**
 >
-> Commit 4e09206 on feat/clone-report-copies \(worktree .worktrees/ppx-clone-reports, branched from feat/phase3b-phantom-rule\): clone\_or\_copy in \[...\]
+> Reference patch for the context-lineage fix, built and verified on a throwaway detached copy of origin/main 4bd2047 \(kernel resolver, \[...\]
 
-Links stored in these records: evt\_002 revises evt\_001; evt\_005 builds on evt\_001; evt\_005 builds on evt\_002.
-
-### The vague cases are the study's subject
-
-*TRACE, March 2026*
-
-> **evt\_005, Decision: agent proposal, accepted by human**
+> **evt\_005, Decision: human proposal, accepted by human**
 >
-> LLM screening implementation plan: 3-tier batched processing \(Tier 1: 479 ambiguous records, Tier 2: 1,073 weak-env records, Tier 3: 1,788 strong-env \[...\]
+> Single ProofPress PR \(fix/context-lineage\): the context-lineage plan plus \(a\) review decisions that would be silently shadowed are refused, and \(b\) \[...\]
 
-> **evt\_010, Correction**
+> **evt\_006, Contribution: human idea, AI built**
 >
-> **Correction:** AI incorrectly excluded/downgraded 3 papers \(\[1187\], \[1194\], \[294\]\) during intensive audit because their abstracts didn't name specific LLM models - only saying 'artificial intelligence' or 'chatbot'. User corrected: papers that use AI but DON'T clearly document which model or how it was used are EXACTLY the kind of papers this study needs. The vague AI acknowledgment pattern \(scoring 0 on A1 Model Named\) is itself the phenomenon the TRACE paper studies. Inclusion criteria should be: if the paper appears to use AI/LLM as a tool in environmental science, include it even if the specific model isn't named - the poor documentation is a data point, not an exclusion reason. This reframes the screening: the question is 'did they use AI for env sci?' not 'can I confirm they used an LLM specifically?'
+> ProofPress branch fix/context-lineage \(9 commits on origin/main 4bd2047, not pushed\): lineage-following blocked entries, fork guard, \[...\]
 
-Links stored in these records: evt\_010 corrects evt\_005.
+> **evt\_008, Correction**
+>
+> **Correction:** AI reported pyright as acceptable because the error count on touched files matched main \(33 errors in operations.py, events.py, control\_plane.py, test\_event\_store.py; 31 in basic mode\). The operator standard is pyright-clean on every modified file, so matching a dirty baseline is not a pass. Human flagged it; the errors are being fixed in the same PR before the confirmation review.
+
+Links stored in these records: evt\_003 builds on evt\_002; evt\_004 builds on evt\_002; evt\_005 revises evt\_002; evt\_006 builds on evt\_005; evt\_008 corrects evt\_006.
+
+### Too early to standardize verification
+
+*TRACE, April 2026*
+
+> **evt\_012, Decision: agent proposal, rejected by human**
+>
+> **Agent proposed:** Add structured verification event type to TRACE \(trace\_log\_verification with method, sample\_size, metric, result, ground\_truth\_source fields\) to directly map to rubric dimension E
+>
+> **Rationale:** Initial analysis identified that TRACE captures evaluation provenance \(E\) only through free-text annotations, lacking structured verification fields. AI proposed adding a dedicated verification event type to strengthen the E1-E2 mapping.
+
+> **evt\_012, Human rejected**
+>
+> Premature standardization for v1 of a domain-agnostic standard. What constitutes 'ground truth' and 'verification' varies too widely across domains \(remote sensing vs genomics vs policy analysis\) for a v1 standard to prescribe structured fields. Annotations capture verification narratively and flexibly. v1 should be minimal-and-correct; structured verification templates are future work for domain-specific extensions. \[...\]
+
+### A question that would have primed respondents
+
+*TRACE, April 2026*
+
+> **evt\_011, Decision: agent proposal, rejected by human**
+>
+> **Agent proposed:** Add Q4b follow-up question asking respondents whether they document the activities they checked in Q4 \(doing-vs-documenting gap measurement\)
+>
+> **Rationale:** Initial analysis identified that the survey measures activities \(doing\) while the rubric measures documentation quality. AI proposed adding a Q4b to directly measure the doing-vs-documenting gap within the survey instrument.
+
+> **evt\_011, Human rejected**
+>
+> Adding Q4b would undermine the survey's deliberate anti-priming design. The v2 survey was carefully constructed to avoid revealing the documentation hypothesis until the end screen \(neutralized preamble, topic reveal after completion\). Asking 'do you document this?' mid-survey would prime respondents, contaminating Q6-Q8 with social desirability bias. The doing-vs-documenting gap is measured ACROSS instruments \(survey=practice, audit=documentation\), which is methodologically cleaner than within-survey self-report. \[...\]
 
 ### Megatonnes are not metric tons
 
@@ -43,6 +71,10 @@ Links stored in these records: evt\_010 corrects evt\_005.
 > **evt\_004, Decision: agent proposal, revised by human**
 >
 > Revise the scope-key proposal so that units, magnitude and patchy reporting are part of the key and the score.
+
+> **evt\_004, Human revised**
+>
+> Accepted on one condition: the target and base comparisons \(the reduction-target key, its sheet, builder, and scoring\) must remain available to revisit later. The scope key is therefore added alongside the target key, not in place of it; \[...\]
 
 > **evt\_006, Decision: agent proposal, accepted by human**
 >
@@ -57,6 +89,34 @@ Links stored in these records: evt\_010 corrects evt\_005.
 > Scope key for Phase 1: unit reading into tonnes CO2e \(case-aware, ambiguous units refused\), scope key models with a computed total check and \[...\]
 
 Links stored in these records: evt\_004 revises evt\_002; evt\_006 revises evt\_004; evt\_008 builds on evt\_004; evt\_008 builds on evt\_006.
+
+### A required final gate caught an unlocked hot path
+
+*TRACE, May 2026*
+
+> **evt\_028, Contribution: human idea, AI built**
+>
+> \[...\] Wrapped all 5 knowledge-store RMW spans in extensions/learn/\_\_init\_\_.py \[...\]
+
+> **evt\_036, Correction**
+>
+> **Correction:** The user-mandated 3-set final gate caught a real defect in my P9\(b\) work. evt\_028 claimed "wrapped all 5 knowledge-store RMW spans". WRONG - there are 6 RMW spans; \`\_recall\_hook\` \(extensions/learn/\_\_init\_\_.py:~97-119\) - the HIGHEST-FREQUENCY path \(core auto-recall, invoked from server.py on session-start/decision-propose/contribution\) - was left UNLOCKED while its tool twin \`trace\_learn\_recall\` and the other 4 spans were locked. Independently corroborated by 2 of 3 final reviewers \(R1 correctness CONDITIONAL \+ R3 reliability CONDITIONAL\); R3 demonstrated a deterministic lost-update \(unlocked \_recall\_hook save clobbers a concurrently-committed locked add → new learning permanently lost\). \[...\]
+
+Links stored in these records: evt\_036 corrects evt\_028.
+
+### Refusing a record that reports itself complete
+
+*RSI-Exam provenance study, September 2026*
+
+> **evt\_006, Decision: agent proposal, rejected by human**
+>
+> **Agent proposed:** Rejected alternative, recorded for deliberation capture and left for the operator to mark: when the experiment log declares a parent that has no snapshot, drop that parent from parent\_ids silently so the child becomes the lineage root. This would let the Opus probe rollout build a record with zero schema change and would pass the verifier's one-root rule as it stands.
+>
+> **Rationale:** Considered and set aside in favour of the unsnapshotted\_parent\_ids field. Dropping the parent produces a record that reports itself complete while omitting lineage the log states, which is exactly the fail-open behaviour removed from the producer in pull request \#19 for unrecognised snapshot directories; reintroducing the same class of silent omission one day later, in the lineage the record exists to carry, would undercut the fail-loud discipline the repository is built on. \[...\]
+
+> **evt\_006, Human rejected**
+>
+> Operator's words on 2026-09-08 \[...\]: "i mean i accept your suggestions. so, i accept 1 and 2 and reject 3." \[...\] Rejected because it would produce a record that reports itself complete while omitting lineage the log plainly states, the same fail-open pattern removed from the producer in pull request \#19.
 
 ### The reviewer should not know the answer in advance
 
@@ -79,6 +139,32 @@ Links stored in these records: evt\_004 revises evt\_002; evt\_006 revises evt\_
 > Reviewer setup v4 and session texts v3, built and tested: the reviewer gets its role, what each action does, and the reviewed session's task word for \[...\]
 
 Links stored in these records: evt\_024 revises evt\_020; evt\_026 builds on evt\_020; evt\_026 builds on evt\_024.
+
+### Reversing a scenario rule after building it
+
+*COEQWAL, October 2026*
+
+> **evt\_007, Decision: agent proposal, accepted by human**
+>
+> **Agent proposed:** Scenario selection follows \[client lead\]'s written rule site-wide: current operations selected by default, the last selected scenario cannot be unselected, and Data in Depth draws exactly the sidebar selection \(its built-in current-operations reference is removed\). \[...\]
+
+> **evt\_013, Decision: human proposal, accepted by human**
+>
+> **Human proposed:** Scenario selection rule, revised: no "current operations always on". Data in Depth behaves like the other tools: with no scenario selected it shows the select-a-scenario prompt, and it compares only the scenarios the user selected \(no forced current-operations reference\).
+>
+> **Rationale:** This reverses the Rule A part of evt\_007 \(built locally on feature/current-ops-always-on, never pushed\). On dev and on \#416, Data in Depth also departs from the other tools: it always adds current operations as a reference, even with nothing selected, and never shows the prompt.
+>
+> **Human accepted:** Oliver stated this as the correct behavior; it replaces the Rule A \("Build A now"\) part of evt\_007.
+
+> **evt\_014, Contribution: human idea, AI built**
+>
+> PR \#417 into dev: Data in Depth shows the select-a-scenario prompt and compares only the selected scenarios; \[...\]
+
+> **evt\_015, Contribution: human idea, AI built**
+>
+> Exhaustive Data in Depth live sweep of PR \#417's build: 27 independent per-variable verifier agents \(every location, data view, chart style, compare \[...\]
+
+Links stored in these records: evt\_013 revises evt\_007; evt\_014 builds on evt\_013; evt\_015 builds on evt\_013.
 
 ### Tests that could not fail
 
@@ -126,55 +212,19 @@ Links stored in these records: evt\_005 corrects ext-1.
 
 Links stored in these records: evt\_005 revises evt\_002; evt\_007 revises evt\_005; evt\_009 revises evt\_005; evt\_010 revises evt\_005; evt\_011 builds on evt\_002; evt\_011 builds on evt\_005; evt\_011 builds on evt\_007; evt\_011 builds on evt\_009; evt\_011 builds on evt\_010.
 
-### Refusing a record that reports itself complete
+### The vague cases are the study's subject
 
-*RSI-Exam provenance study, September 2026*
+*TRACE, March 2026*
 
-> **evt\_006, Decision: agent proposal, rejected by human**
+> **evt\_005, Decision: agent proposal, accepted by human**
 >
-> **Agent proposed:** Rejected alternative, recorded for deliberation capture and left for the operator to mark: when the experiment log declares a parent that has no snapshot, drop that parent from parent\_ids silently so the child becomes the lineage root. This would let the Opus probe rollout build a record with zero schema change and would pass the verifier's one-root rule as it stands.
+> LLM screening implementation plan: 3-tier batched processing \(Tier 1: 479 ambiguous records, Tier 2: 1,073 weak-env records, Tier 3: 1,788 strong-env \[...\]
+
+> **evt\_010, Correction**
 >
-> **Rationale:** Considered and set aside in favour of the unsnapshotted\_parent\_ids field. Dropping the parent produces a record that reports itself complete while omitting lineage the log states, which is exactly the fail-open behaviour removed from the producer in pull request \#19 for unrecognised snapshot directories; reintroducing the same class of silent omission one day later, in the lineage the record exists to carry, would undercut the fail-loud discipline the repository is built on. \[...\]
->
-> **Human rejected:** Operator's words on 2026-09-08, after a clarifying exchange: "i mean i accept your suggestions. so, i accept 1 and 2 and reject 3." His first phrasing, "\(3\) i accept this as well", accepted the recommendation to reject; the clarification removes the ambiguity. \[...\]
+> **Correction:** AI incorrectly excluded/downgraded 3 papers \(\[1187\], \[1194\], \[294\]\) during intensive audit because their abstracts didn't name specific LLM models - only saying 'artificial intelligence' or 'chatbot'. User corrected: papers that use AI but DON'T clearly document which model or how it was used are EXACTLY the kind of papers this study needs. The vague AI acknowledgment pattern \(scoring 0 on A1 Model Named\) is itself the phenomenon the TRACE paper studies. Inclusion criteria should be: if the paper appears to use AI/LLM as a tool in environmental science, include it even if the specific model isn't named - the poor documentation is a data point, not an exclusion reason. This reframes the screening: the question is 'did they use AI for env sci?' not 'can I confirm they used an LLM specifically?'
 
-### Require a visual check before export
-
-*COEQWAL, July 2026*
-
-> **evt\_006, Contribution: human idea, AI built**
->
-> Produced a non-technical findings brief \(Claude artifact, print-to-PDF ready\) explaining the latency measurements \[...\]
-
-> **evt\_007, Correction**
->
-> **Correction:** Oliver reviewed the first version of the loading-speed brief and corrected two things: \(1\) wording was too padded for the audience \("two worries turned out to be non-issues" and similar framing removed; brief tightened to timing facts only\); \(2\) required a visual QA pass before export, which caught a real layout bug: the 4.7s value labels on full-width bars overflowed the chart-card edge \(bars rescaled to 84% max so labels always fit inside\). Verified after fixes via full-page screenshots at desktop/narrow widths in light and dark themes.
-
-Links stored in these records: evt\_007 corrects evt\_006.
-
-### One PR, reviewed before it is called done
-
-*proofpress, October 2026*
-
-> **evt\_002, Decision: agent proposal, revised by human**
->
-> **Agent proposed:** ProofPress context-lineage fix design: one PR off origin/main \(fix/context-lineage\). \[...\]
->
-> **Human revised:** Human kept the context-lineage design but rejected splitting the follow-ups: one PR must also fix the shadowed admission in review\_v2 and the uneven disclosure filtering in receipt\_v2 / traverse\_graph\_v2, then go through inline adversarial passes and gpt-6.1-sol passes before it is called good to go.
-
-> **evt\_003, Contribution: human idea, AI built**
->
-> Implementation plan for the ProofPress context-lineage PR \(fix/context-lineage off origin/main 4bd2047\): 5 TDD tasks \(resolver \+ context\_v2; \[...\]
-
-> **evt\_004, Contribution: human idea, AI built**
->
-> Reference patch for the context-lineage fix, built and verified on a throwaway detached copy of origin/main 4bd2047 \(kernel resolver, \[...\]
-
-> **evt\_005, Decision: human proposal, accepted by human**
->
-> Single ProofPress PR \(fix/context-lineage\): the context-lineage plan plus \(a\) review decisions that would be silently shadowed are refused, and \(b\) \[...\]
-
-Links stored in these records: evt\_003 builds on evt\_002; evt\_004 builds on evt\_002; evt\_005 revises evt\_002.
+Links stored in these records: evt\_010 corrects evt\_005.
 
 ### Check that the health checker catches broken setups
 
@@ -189,32 +239,4 @@ Links stored in these records: evt\_003 builds on evt\_002; evt\_004 builds on e
 > **Correction:** A Tier-1 code-review pass over the branch found nine real defects in the conformance probes, all false-negatives - the checker blessing deployments that are actually broken, which matters more than usual because INV-11 makes a clean doctor report load-bearing. The most serious: the hook checks flattened settings.json and discarded the host event, so moving the whole PostToolUse registration block to PreToolUse still reported ok - the decision-audit hook could never fire, which is the very defect INV-11 was minted for. Fixed by deriving the required event per hook from the installer's own settings\_template.json, the same derive-don't-restate rule the rest of the module follows. \[...\]
 
 Links stored in these records: evt\_005 corrects evt\_003.
-
-### One sheet instead of four
-
-*proofpress experiments, October 2026*
-
-> **evt\_008, Contribution: shared idea, AI built**
->
-> Scope key for Phase 1: unit reading into tonnes CO2e \(case-aware, ambiguous units refused\), scope key models with a computed total check and \[...\]
-
-> **evt\_010, Correction**
->
-> **Correction:** The operator cut the scope key workbook down to a single sheet \("Values"\), dropping the How to fill, Reports, and Example sheets the harness had generated, and set a standing rule: hand-filled xlsx files are one sheet unless there is a clear reason for more, because extra sheets clutter the form and make mistakes more likely. Fixed in 33c6f40. The scope sheet is now one sheet, read by column header whatever its name. \[...\]
-
-Links stored in these records: evt\_010 corrects evt\_008.
-
-### A required final gate caught an unlocked hot path
-
-*TRACE, May 2026*
-
-> **evt\_028, Contribution: human idea, AI built**
->
-> \[...\] Wrapped all 5 knowledge-store RMW spans in extensions/learn/\_\_init\_\_.py \[...\]
-
-> **evt\_036, Correction**
->
-> **Correction:** The user-mandated 3-set final gate caught a real defect in my P9\(b\) work. evt\_028 claimed "wrapped all 5 knowledge-store RMW spans". WRONG - there are 6 RMW spans; \`\_recall\_hook\` \(extensions/learn/\_\_init\_\_.py:~97-119\) - the HIGHEST-FREQUENCY path \(core auto-recall, invoked from server.py on session-start/decision-propose/contribution\) - was left UNLOCKED while its tool twin \`trace\_learn\_recall\` and the other 4 spans were locked. Independently corroborated by 2 of 3 final reviewers \(R1 correctness CONDITIONAL \+ R3 reliability CONDITIONAL\); R3 demonstrated a deterministic lost-update \(unlocked \_recall\_hook save clobbers a concurrently-committed locked add → new learning permanently lost\). \[...\]
-
-Links stored in these records: evt\_036 corrects evt\_028.
 

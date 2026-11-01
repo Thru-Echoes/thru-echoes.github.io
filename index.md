@@ -54,10 +54,19 @@ operational data. **Live app and architecture diagrams.**
   </div>
   <div class="trace-callout-actions">
     <a href="https://github.com/Thru-Echoes/TRACE" target="_blank" rel="noopener" class="trace-callout-button">★ Star on GitHub →</a>
-    <a href="/trace-evidence" class="trace-callout-button-secondary">See the evidence →</a>
+    <a href="/trace-evidence" class="trace-callout-button-secondary">The evidence: decision chains →</a>
+    <a href="/trace-usage" class="trace-callout-button-secondary">Usage overview →</a>
     <a href="https://github.com/Thru-Echoes/TRACE/blob/main/docs/specification.md" target="_blank" rel="noopener" class="trace-callout-button-secondary">Read the spec ↗</a>
   </div>
 </div>
+
+:::{div}
+:class: trace-featured-wrap
+
+```{include} projects/trace/_evidence_featured.md
+```
+
+:::
 
 ## Skills
 

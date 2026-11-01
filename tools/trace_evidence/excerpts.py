@@ -13,9 +13,11 @@ Approvals file (YAML, kept outside the repository):
             headline: Approved short text.
             text: |                    # optional longer quote, one labelled part per line
               Correction: verbatim approved text.
+            resolution: Approved text  # optional; a human's rejection or revision of a decision
         external:                      # optional; only refs a shown record actually stores
           - ref: external:github.com/org/repo/pull/1
             label: Approved label
+        featured: true                 # optional; at most one chain, shown on the landing page
         approved: true
         approved_on: 2026-11-02
         approved_by: owner
@@ -207,6 +209,12 @@ def get_excerpts(
             node = _node(events[eid], headline, _clean(rn.get("text")) or None)
             if node is None:
                 raise ExcerptError("unsupported-node-type", i)
+            resolution = _clean(rn.get("resolution")) or None
+            if resolution:
+                ruled = node.kind == "decision" and node.disposition in ("rejected", "revised") and node.resolved_by == "human"
+                if not ruled:
+                    raise ExcerptError("resolution-not-allowed", i)
+                node = node.model_copy(update={"resolution": resolution})
             nodes.append(node)
         shown = {n.id for n in nodes}
         if str(e.get("key_event_id")) not in shown:
@@ -241,6 +249,12 @@ def get_excerpts(
         if _has_cycle(edges):
             raise ExcerptError("cyclic-links", i)
 
+        featured = e.get("featured", False)
+        if not isinstance(featured, bool):
+            raise ExcerptError("bad-featured", i)
+        if featured and any(x.featured for x in out):
+            raise ExcerptError("multiple-featured", i)
+
         slug = get_slug(title)
         if slug in slugs:
             raise ExcerptError("duplicate-title", i)
@@ -257,6 +271,7 @@ def get_excerpts(
                 nodes=nodes,
                 edges=edges,
                 unshown_links=unshown,
+                featured=featured,
                 approved_on=e["approved_on"],
                 approved_by=_clean(e["approved_by"]),
             )

@@ -182,22 +182,28 @@ command must pass locally before a PR.
 Two pages are generated from the maintainer's local TRACE store. Nothing on
 either page is hand-typed:
 
-- `/trace-evidence` (`projects/trace/trace-evidence.md`): the overview, with
-  aggregate counts, the summary table, two light/dark SVG charts, and methods.
-- `/trace-decisions` (`projects/trace/trace-decisions.md`): approved decision
-  chains drawn as an interactive graph by `projects/trace/chains-graph.mjs`
+- `/trace-evidence` (`projects/trace/trace-evidence.md`): the evidence,
+  approved decision chains drawn as an interactive graph by
+  `projects/trace/chains-graph.mjs`
   (a MyST `anywidget`, no dependencies, styled by `chains-graph.css` and the
   `--tcg-*` tokens in `theme/overrides.css`). The module holds no data; the
   generated `_evidence_graph.md` passes the chains in as the widget body. A
-  text version of every chain sits in a dropdown below it.
+  text version of every chain sits in a dropdown below it. A decision a human
+  rejected or revised is drawn as two boxes: the proposal and the human's
+  ruling (both stored on the same record).
+- `/trace-usage` (`projects/trace/trace-usage.md`): how much TRACE is used,
+  with aggregate counts, the summary table, two light/dark SVG charts, and
+  methods.
+- The landing page (`index.md`) includes `_evidence_featured.md`: the one
+  chain marked `featured` in the approvals, in the widget's compact mode.
 
 `tools/trace_evidence/` reads the store **read-only** and writes the files in
 `PUBLIC_FILES`: `static/evidence/evidence.json`, four SVG charts, and the
 `projects/trace/_evidence_*.md` fragments the pages include. Regenerate them
 all at once; never edit them by hand.
 
-- Chain approvals (a private file) supply only text: a headline per record
-  and optional longer quotes. Node metadata and every graph edge come from
+- Chain approvals (a private file) supply only text: a headline per record,
+  optional longer quotes, and optional human-ruling text. Node metadata and every graph edge come from
   the records' own link fields (`revises_event_id`, `corrects_event_ids`,
   `related_decision_ids`); links to records that are not shown are counted,
   not drawn.

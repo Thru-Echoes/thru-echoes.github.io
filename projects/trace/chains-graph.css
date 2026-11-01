@@ -56,6 +56,8 @@
 .tcg-glyph line.r-corrects { stroke-dasharray: 2 2; }
 .tcg-glyph circle { fill: var(--muted); }
 .tcg-glyph circle.key { fill: var(--accent); }
+.tcg-glyph circle.ruling { fill: var(--human); }
+.tcg-glyph line.r-rules { stroke: var(--human); }
 
 /* selected chain header */
 .tcg-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0.5rem 1rem; margin-bottom: 0.75rem; }
@@ -71,6 +73,9 @@
 .tcg-edge.r-builds_on { stroke-dasharray: 1 4; stroke-linecap: round; stroke-width: 2; }
 .tcg-edge.on { stroke: var(--fg); stroke-width: 2; }
 .tcg-arrow { fill: var(--line); }
+.tcg-edge.r-rules { stroke: var(--human); stroke-width: 2; }
+.tcg-arrow.r-rules { fill: var(--human); }
+.tcg-elabel.r-rules { border-color: var(--human); }
 
 .tcg-node {
   position: absolute; box-sizing: border-box; display: flex; flex-direction: column; gap: 0.3rem;
@@ -81,6 +86,7 @@
 .tcg-node:hover { border-color: var(--accent); }
 .tcg-node.k-correction { border-left: 4px solid var(--fg); }
 .tcg-node.k-external { border-style: dashed; }
+.tcg-node.k-ruling { border-left: 4px solid var(--human); background: color-mix(in srgb, var(--human) 6%, var(--bg)); }
 .tcg-node.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
 .tcg-node-top { display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; }
 .tcg-kind { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
@@ -109,6 +115,7 @@
 .tcg-line { display: inline-block; width: 22px; border-top: 2px solid var(--line); }
 .tcg-line.r-corrects { border-top-style: dashed; }
 .tcg-line.r-builds_on { border-top-style: dotted; }
+.tcg-line.r-rules { border-top-color: var(--human); }
 
 /* detail */
 .tcg-detail { border-top: 1px solid var(--border); padding-top: 0.9rem; max-width: 780px; }
@@ -118,6 +125,7 @@
 .tcg-quote a { color: var(--accent); }
 .tcg-rel { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem; }
 .tcg-rel-title { font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-right: 0.2rem; }
+.tcg-rel .tcg-chip { display: inline-block; max-width: 100%; border-radius: 12px; line-height: 1.4; }
 
 @media (prefers-reduced-motion: reduce) { .tcg-node { transition: none; } }
 @media (forced-colors: active) { .tcg-node.sel { outline: 3px solid Highlight; } }

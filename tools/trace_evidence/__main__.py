@@ -12,7 +12,7 @@ exactly what the committed evidence.json renders to):
     python -m tools.trace_evidence --from-json static/evidence/evidence.json --check
 
 Side effects:
-  * store mode writes the 11 PUBLIC_FILES (atomically: all are rendered and
+  * store mode writes the 12 PUBLIC_FILES (atomically: all are rendered and
     validated in a temp dir before any is replaced) and two private files,
     evidence-diagnostics.json and evidence-manifest.json, into --private-dir,
     which must be outside the git worktree;
@@ -43,7 +43,7 @@ from .charts import get_contrib_svg, get_weekly_svg
 from .excerpts import ExcerptError, get_excerpts
 from .load import get_alias_map, get_release_map, get_snapshot
 from .models import EvidenceReport
-from .render_md import get_claim_md, get_contrib_table_md, get_excerpts_md, get_graph_md, get_methods_md, get_table_md
+from .render_md import get_claim_md, get_contrib_table_md, get_excerpts_md, get_featured_md, get_graph_md, get_methods_md, get_table_md
 
 OUT_DIR = Path("static/evidence")
 MD_DIR = Path("projects/trace")
@@ -59,6 +59,7 @@ PUBLIC_FILES: tuple[Path, ...] = (
     MD_DIR / "_evidence_contributions.md",
     MD_DIR / "_evidence_excerpts.md",
     MD_DIR / "_evidence_graph.md",
+    MD_DIR / "_evidence_featured.md",
 )
 _BANNED = ("—", "–", " -- ")
 
@@ -82,6 +83,7 @@ def get_rendered(report: EvidenceReport) -> dict[str, str]:
         str(MD_DIR / "_evidence_contributions.md"): get_contrib_table_md(report),
         str(MD_DIR / "_evidence_excerpts.md"): get_excerpts_md(report),
         str(MD_DIR / "_evidence_graph.md"): get_graph_md(report),
+        str(MD_DIR / "_evidence_featured.md"): get_featured_md(report),
     }
 
 

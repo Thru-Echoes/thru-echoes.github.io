@@ -176,7 +176,8 @@ def test_approved_excerpt_published(store, release_map, tmp_path):
     md = (root / "projects/trace/_evidence_excerpts.md").read_text()
     assert "### T" in md and "> Approved words." in md and "*Acme, March 2026*" in md
     graph = (root / "projects/trace/_evidence_graph.md").read_text()
-    assert graph.startswith(":::{anywidget} ./chains-graph.mjs\n") and "Approved words." in graph
+    assert graph.startswith(":::{anywidget} /projects/trace/chains-graph.mjs\n") and "Approved words." in graph
+    assert (root / "projects/trace/_evidence_featured.md").read_text() == ""  # nothing featured
 
 
 def _dec(eid: str, by: str, disp: str, res: str | None, revises: object = None) -> dict[str, object]:
@@ -308,6 +309,58 @@ def test_only_corrections_draw_corrects_links(make_store, release_map, tmp_path)
     assert rc == 0 and x is not None and x.edges == [] and x.nodes[1].kind == "annotation"
 
 
+def test_human_ruling_is_published_only_on_human_rejections_and_revisions(chain_store, release_map, tmp_path):
+    nodes = [{"event_id": "d1", "headline": "h", "resolution": "No, because Y."}]
+    rc, x = _chain(chain_store, release_map, tmp_path, key_event_id="d1", nodes=nodes)
+    assert rc == 0 and x is not None and x.nodes[0].resolution == "No, because Y."
+    md = (tmp_path / "site/projects/trace/_evidence_excerpts.md").read_text()
+    assert "> **d1, Human rejected**\n>\n> No, because Y." in md
+
+
+def test_ruling_requires_a_human_resolver_and_allows_revisions(make_store, release_map, tmp_path, capsys):
+    evs = [_dec("r1", "human", "rejected", "ai"), _dec("v1", "ai", "revised", "human")]
+    st = make_store([session_dict("s1", "acme", events=evs)])
+    rc, _ = _chain(st, release_map, tmp_path, key_event_id="r1", nodes=[{"event_id": "r1", "headline": "h", "resolution": "zz"}])
+    assert rc == 2 and "resolution-not-allowed" in capsys.readouterr().err  # rejected, but by an AI
+    rc, x = _chain(st, release_map, tmp_path, key_event_id="v1", nodes=[{"event_id": "v1", "headline": "h", "resolution": "Keep it, but Z.\n\nSecond paragraph."}])
+    assert rc == 0 and x is not None and x.nodes[0].resolution
+    md = (tmp_path / "site/projects/trace/_evidence_excerpts.md").read_text()
+    assert "> **v1, Human revised**\n>\n> Keep it, but Z.\n>\n> Second paragraph.\n" in md  # stays inside the quote
+
+
+@pytest.mark.parametrize("eid", ["d2", "a1", "c1"])  # accepted decision, correction, contribution
+def test_ruling_text_on_other_records_is_rejected(chain_store, release_map, tmp_path, capsys, eid):
+    rc, _ = _chain(chain_store, release_map, tmp_path, key_event_id=eid, nodes=[{"event_id": eid, "headline": "h", "resolution": "zz"}])
+    assert rc == 2 and "resolution-not-allowed" in capsys.readouterr().err
+
+
+def test_featured_chain_renders_compact_block_with_link(chain_store, release_map, tmp_path):
+    import json as _json
+
+    rc, _ = _chain(chain_store, release_map, tmp_path, key_event_id="d1", nodes=[{"event_id": "d1", "headline": "h"}], featured=True)
+    assert rc == 0
+    text = (tmp_path / "site/projects/trace/_evidence_featured.md").read_text()
+    lines = text.splitlines()
+    at = lines.index(":::{anywidget} /projects/trace/chains-graph.mjs")
+    assert lines[at + 2] == ":class: trace-featured" and _json.loads(lines[at + 3])["compact"] is True
+    assert text.startswith("**One decision chain from my TRACE records.**")
+    assert "[See the decision chain →](/trace-evidence#chain=t)" in text
+
+
+def test_featured_must_be_boolean_and_unique(chain_store, release_map, tmp_path, capsys):
+    import yaml
+
+    one = {"session_id": "s1", "key_event_id": "d1", "nodes": [{"event_id": "d1", "headline": "h"}], "featured": True,
+           "approved": True, "approved_on": date(2026, 4, 9), "approved_by": "owner"}  # fmt: skip
+    p = tmp_path / "private" / "approved.yaml"
+    p.write_text(yaml.safe_dump({"excerpts": [{**one, "title": "A"}, {**one, "title": "B"}]}))
+    assert _cli(chain_store, release_map, tmp_path / "site", "--excerpts", str(p)) == 2
+    assert "multiple-featured" in capsys.readouterr().err
+    p.write_text(yaml.safe_dump({"excerpts": [{**one, "title": "A", "featured": "yes"}]}))
+    assert _cli(chain_store, release_map, tmp_path / "site", "--excerpts", str(p)) == 2
+    assert "bad-featured" in capsys.readouterr().err
+
+
 def test_external_ref_must_be_stored_by_a_shown_record(chain_store, release_map, tmp_path):
     rc, _ = _chain(chain_store, release_map, tmp_path, key_event_id="d1", nodes=[{"event_id": "d1", "headline": "h"}], external=_EXT)
     assert rc == 2  # a1 stores the ref, but a1 is not shown
@@ -342,7 +395,7 @@ def test_graph_block_body_is_the_chain_data(chain_store, release_map, tmp_path):
     rc, _ = _chain(chain_store, release_map, tmp_path, key_event_id="a1", nodes=_ALL, external=_EXT)
     assert rc == 0
     lines = (tmp_path / "site/projects/trace/_evidence_graph.md").read_text().splitlines()
-    assert lines[:3] == [":::{anywidget} ./chains-graph.mjs", ":css: ./chains-graph.css", ":class: col-page-right"] and lines[-1] == ":::"
+    assert lines[:3] == [":::{anywidget} /projects/trace/chains-graph.mjs", ":css: /projects/trace/chains-graph.css", ":class: col-page-right"] and lines[-1] == ":::"
     model = _json.loads(lines[3])
     (c,) = model["chains"]
     assert c["key"] == "a1" and len(c["edges"]) == 5 and c["unshown"] == 2
