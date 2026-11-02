@@ -50,6 +50,7 @@ EXTERNAL_SKIP: set[str] = {
     "mystmd.org",          # works
     "creativecommons.org", # works
     "opensource.org",      # works
+    "waggle.fly.dev",      # demo is behind a shared basic-auth login (401 without it)
 }
 
 REQUEST_TIMEOUT = 10.0
