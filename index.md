@@ -40,7 +40,7 @@ and HPC.
 A full-stack agentic CRM I built for a beekeeping wholesale domain.
 Custom chatbots, an automated ordering pipeline that converts inbound
 email into typed orders, and a semantic-search RAG layer over
-operational data. **Live app and architecture diagrams.**
+operational data. **Live app, source code, and architecture diagrams.**
 :::
 
 <div class="trace-callout">

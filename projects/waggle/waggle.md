@@ -14,8 +14,9 @@ inbound email into typed, reviewable orders, and a semantic-search RAG
 layer over historical inspections, customer correspondence, and product
 data.
 
-- **Live app:** *forthcoming*
-- **Code:** *forthcoming*
+- **Live app:** [waggle.fly.dev](https://waggle.fly.dev) (demo login: username `tester`,
+  password `letMeTest1`; all data is synthetic)
+- **Code:** [github.com/Thru-Echoes/agentic-waggle](https://github.com/Thru-Echoes/agentic-waggle)
 - **Stack:** Python · FastAPI · Postgres + pgvector · LangGraph · MCP · Docker
 
 ---
